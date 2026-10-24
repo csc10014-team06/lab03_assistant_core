@@ -6,8 +6,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import sys
-from pathlib import Path
 
 from assistant_core.config import load_settings
 from assistant_core.data_loader import DataLoadError, load_handbook, load_offices

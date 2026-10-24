@@ -12,7 +12,6 @@ Coverage goals
 """
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pytest
@@ -21,7 +20,6 @@ from assistant_core.config import Settings
 from assistant_core.data_loader import Office, Rule
 from assistant_core.llm import FakeLLM, LLMError
 from assistant_core.service import AssistantService
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -162,6 +160,10 @@ class TestHandleFee:
         response = service.handle("tuition for 18 credits and 2 retake")
         assert "9450000" in response
 
+    def test_fees_plural_triggers_fee_branch(self, service):
+        assert service.handle("what are the fees?") == "How many credits?"
+        assert service.stats()["fee"] == 1
+
     def test_fee_zero_credits(self, service):
         response = service.handle("how much is the fee?")
         assert response == "How many credits?"
@@ -205,8 +207,8 @@ class TestHandleOffice:
 
     def test_office_miss(self, service):
         response = service.handle("where is the cafeteria?")
-        # Should NOT return an office line; falls through to handbook or fallback
-        assert "room" not in response.lower() or "cafeteria" not in response.lower()
+        # Should NOT return an office line; falls through to the fallback
+        assert response == "Sorry I dont know"
 
     def test_office_registrar(self, service):
         response = service.handle("I need the registrar office")
@@ -309,8 +311,6 @@ class TestStats:
             service.handle(m)
         s = service.stats()
         total = s["fee"] + s["office"] + s["rule"] + s["other"]
-        # +1 because handle("stats") also appends "stats" to history
-        # but we are calling stats() directly here — total == len(messages)
         assert total == len(messages)
 
 

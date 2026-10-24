@@ -5,9 +5,9 @@ Stub module: implementation owned by long_th.
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Mapping
 
 
 @dataclass(frozen=True)

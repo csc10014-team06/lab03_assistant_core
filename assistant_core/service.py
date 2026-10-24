@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 
 # Words that reliably indicate a fee / tuition intent (whole-word match).
 # Using re.search with \b avoids 'coffee' triggering the fee branch.
-_FEE_PATTERN = re.compile(r"\b(fee|tuition)\b", re.IGNORECASE)
+_FEE_PATTERN = re.compile(r"\b(fees?|tuition)\b", re.IGNORECASE)
 
 # Words that indicate rule/handbook intent (used in stats only).
 _RULE_KEYWORDS = frozenset({"thesis", "retake", "exam", "credit"})
