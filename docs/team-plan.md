@@ -90,7 +90,7 @@ class AssistantService:
 |---|---|---|---|
 | **long_th** | `config.py`, `tests/test_characterization.py` | Move every magic number/flag into `Settings`; read API key from env var (add `.env.example`, never commit real keys). **Before anyone refactors**, write characterization tests that pin the monolith's current outputs (the 6 cases in `test()` + edge cases). | Changing the rate = 1 place; characterization tests pass against old AND new code |
 | **vy_th** | `data_loader.py` | Replace both bare `except:` with specific exceptions; use `with open(...)` / `pathlib`; parse CSV with `DictReader` into `Office`; validate handbook entries into `Rule`; log (not print) a clear warning when a file is missing; move `data/` into the package. | Missing/broken file → defined behaviour + test |
-| **dieu_sp** | `fees.py` | Extract fee parsing & calculation (monolith lines 60–75) into pure functions; no globals; handle "retake"/"retakes", "?" etc.; decide how `"coffee"` vs `"fee"` keyword matching is handled (word match). | Parametrized tests incl. 0 credits, >30, retakes, 18+2 = 13 050 000 VND |
+| **dieu_sp** | `fees.py` | Extract fee parsing & calculation (monolith lines 60–75) into pure functions; no globals; handle "retake"/"retakes", "?" etc.; decide how `"coffee"` vs `"fee"` keyword matching is handled (word match). | Parametrized tests incl. 0 credits, >30, retakes, 18 credits + 2 retakes = 9 450 000 VND |
 | **truyen_lp** | `offices.py`, `handbook.py` | Extract office lookup (lines 77–80) and keyword scoring search (lines 82–91); make scoring a pure function; keep tie-breaking identical; return dataclasses not raw rows. Later: implement the **AI-extension feature** (exam absence answer) — see §5. | Tests for hit, miss, tie, case-insensitivity |
 | **nhat_npm** | `llm.py` | Define `LLMClient` protocol; `FakeLLM` for tests (no `sleep`, no `random`); `DemoLLM` keeps current behaviour with injectable RNG/timeout; raise `LLMError` instead of bare `Exception`; **never log the API key**; log prompts only at DEBUG and truncated. | Tests run offline, deterministic, with no key |
 | **nhat_dm** | `service.py` | `AssistantService` class replacing `handle()`, `stats()`, `save_history()` and the `history` global; route intents by calling dieu_sp/truyen_lp/nhat_npm functions; LLM failure → fall back to rule text (as today); fix `save` path traversal (`save ../../x`) by restricting to `history_dir`; `stats()` returns a dict, formatting stays in CLI. | All characterization tests green via the service |
@@ -116,7 +116,7 @@ Shared by everyone:
 | Problem | Where | Owner |
 |---|---|---|
 | Hard-coded API key, and it is printed in debug output | lines 6, 37 | long_th, nhat_npm |
-| 5 module-level mutable globals (`history`, `offices`, `handbook`, …) | lines 11–13 | nhat_dm |
+| 9 module-level globals, 3 of them mutable state (`history`, `offices`, `handbook`) | lines 11–13 | nhat_dm |
 | Bare `except:` (×3) swallow all errors | lines 26, 30, 136 | vy_th, han_htg |
 | Files opened without `with`; handbook file never closed | lines 20, 29, 119 | vy_th, nhat_dm |
 | `handle()` is ~55 lines doing 7 jobs | lines 44–99 | dieu_sp, truyen_lp, nhat_dm |
