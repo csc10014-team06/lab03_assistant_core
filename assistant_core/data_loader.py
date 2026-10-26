@@ -22,6 +22,7 @@ class DataLoadError(Exception):
     pass
 
 def load_offices(path: Path) -> dict[str, Office]:
+    """Load and validate offices from CSV, keyed by lowercase name."""
     offices = {}
 
     try:
@@ -67,6 +68,7 @@ def load_offices(path: Path) -> dict[str, Office]:
     return offices
 
 def load_handbook(path: Path) -> list[Rule]:
+    """Load and validate handbook rules from a JSON file."""
     rules = []
 
     try:
