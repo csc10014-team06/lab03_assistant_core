@@ -58,3 +58,47 @@ def load_offices(path: Path) -> dict[str, Office]:
 
     return offices
 
+def load_handbook(path: Path) -> list[Rule]:
+    rules = []
+
+    try:
+        with path.open(encoding="utf-8") as f:
+            data = json.load(f)
+
+            if not isinstance(data, list):
+                raise DataLoadError("Handbook must be a list")
+
+            for index, row in enumerate(data, start=1):
+                try:
+                    if not isinstance(row, dict):
+                        raise ValueError("entry must be a dictionary")
+
+                    rule_id = row["id"]
+                    if not isinstance(rule_id, str) or not rule_id.strip():
+                        raise ValueError("invalid or empty id")
+            
+                    rule_id = rule_id.strip()
+
+                    title = row["title"]
+                    if not isinstance(title, str) or not title.strip():
+                        raise ValueError("invalid or empty title")
+            
+                    title = title.strip()
+
+                    text = row["text"]
+                    if not isinstance(text, str) or not text.strip():
+                        raise ValueError("invalid or empty text")
+            
+                    text = text.strip()
+
+                    rule = Rule(rule_id, title, text)
+                    rules.append(rule)
+                except (ValueError, TypeError, KeyError) as e:
+                    raise DataLoadError(f"entry {index}: {e}") from e
+    except FileNotFoundError as e:
+        raise DataLoadError(f"Handbook file not found: {path}") from e
+
+    except json.JSONDecodeError as e:
+        raise DataLoadError(f"Invalid handbook JSON: {e}") from e
+
+    return rules
