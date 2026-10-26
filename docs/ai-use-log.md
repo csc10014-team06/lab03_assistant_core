@@ -25,7 +25,18 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Prompt**: "Write a Python function in handbook.py that extracts the exam absence rule and returns a direct answer with the deadline for submitting evidence to the Training Office."
 - **Kept**: Core intent of finding rule and providing deadline answer.
 - **Changed**:
-  1. Replaced hardcoded text with dynamic regex extraction against `Rule.text` from the handbook dataset.
+  1. Replaced hardcoded text with dynamic regex extraction against `Rule.text` from the handbook dataset (extracting both office and deadline dynamically).
   2. Replaced untyped signature returning string on error with `Rule | None` / `str | None` type hints and proper docstrings.
-  3. Replaced fragile `r.title` check with canonical ID `H26-7.2` lookup and pure `best_rule` keyword fallback.
+  3. Replaced fragile `r.title` check with canonical ID `_EXAM_ABSENCE_RULE_ID` lookup and pure `best_rule` keyword fallback.
 - **Review documented in**: `worksheets/ai_extension_review.md`.
+
+### Session 3: Peer Review Feedback & Hardening
+- **Date**: 2026-10-26
+- **Tool**: Antigravity (Gemini 3.8 Flash High)
+- **Prompt**: "Review PR feedback from dieu_sp and address all 5 points."
+- **Kept**: Feedback points from dieu_sp.
+- **Changed**:
+  1. Upgraded `find_office` in `offices.py` to use word-boundary matching `\b{key}\b` (addressing monolith line 78 substring bug).
+  2. Extracted both destination office and deadline dynamically via named groups in `_ABSENCE_PATTERN` to strictly uphold single source of truth.
+  3. Added module constant `_EXAM_ABSENCE_RULE_ID = "H26-7.2"`.
+  4. Added unit tests for substring false positive rejection and dynamic office extraction.

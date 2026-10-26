@@ -225,3 +225,20 @@ class TestExamAbsenceExtension:
         assert "contact the dean immediately" in response
         assert "(source: H26-7.2)" in response
 
+    def test_get_exam_absence_deadline_dynamic_office_and_deadline(self):
+        """Office and deadline are dynamically extracted from rule.text (single source of truth)."""
+        rule = Rule(
+            id="H26-7.2",
+            title="Exam absence",
+            text=(
+                "Students absent from exam must submit evidence "
+                "to the Faculty Office within 5 working days."
+            ),
+        )
+        response = get_exam_absence_deadline([rule])
+        assert response is not None
+        assert "within 5 working days" in response
+        assert "to the Faculty Office" in response
+        assert "(source: H26-7.2)" in response
+
+
