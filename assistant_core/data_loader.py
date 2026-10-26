@@ -28,6 +28,11 @@ def load_offices(path: Path) -> dict[str, Office]:
         with open(path, newline="", encoding="utf-8") as f:
             data = csv.DictReader(f)
 
+            required_columns = {"name", "room", "hours"}
+
+            if not data.fieldnames or not required_columns.issubset(data.fieldnames):
+                raise DataLoadError("Office CSV missing required columns")
+
             for line_num, row in enumerate(data, start = 2):
                 try:
                     if None in row:

@@ -25,6 +25,17 @@ def test_load_offices_missing_file(tmp_path):
     with pytest.raises(DataLoadError):
         load_offices(path)
 
+def test_load_offices_missing_columns(tmp_path):
+    path = tmp_path / "offices.csv"
+
+    path.write_text(
+        "name,room\n",
+        encoding="utf-8"
+    )
+
+    with pytest.raises(DataLoadError, match="Office CSV missing required columns"):
+        load_offices(path)
+
 def test_load_offices_empty_room(tmp_path):
     path = tmp_path / "offices.csv"
 
