@@ -5,15 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "assistant-core"
 version = "0.3.0"
+description = "Refactored study-assistant package (Lab 3)"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.7,<3",
     "python-dotenv>=1.0,<2",
 ]
 
+[project.scripts]
+assistant = "assistant_core.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["assistant_core*"]
+
+[tool.setuptools.package-data]
+"assistant_core" = ["data/*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
