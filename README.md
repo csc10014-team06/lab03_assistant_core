@@ -99,13 +99,19 @@ Run without arguments to enter an interactive conversation loop:
 python -m assistant_core
 ```
 ```text
-Study Assistant Core. Type 'quit' to exit.
+============================================================
+Study Assistant Core
+Ask me questions about:
+  * Offices:   e.g. 'where is the library?', 'health service'
+  * Tuition:   e.g. 'tuition 18 credits 2 retakes', 'fees'
+  * Handbook:  e.g. 'exam absence', 'thesis rule', 'max credits'
+  * Commands:  'stats', 'save <filename>', 'quit'
+Type 'quit' or 'exit' to exit.
+============================================================
 > where is the medical room?
 Health Service: room A.105, open Mon-Fri 08:00-16:30
 > stats
-Total queries: 1
-By category:
-  offices: 1
+fee=0 office=1 rule=0 other=0
 > quit
 Goodbye!
 ```
