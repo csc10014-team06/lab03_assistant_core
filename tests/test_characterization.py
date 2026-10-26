@@ -70,9 +70,8 @@ class MonolithDriver:
 class PackageDriver:
     def __init__(self, tmp_path: Path) -> None:
         service = pytest.importorskip("assistant_core.service")
-        from assistant_core.data_loader import load_handbook, load_offices
-
         from assistant_core.config import Settings
+        from assistant_core.data_loader import load_handbook, load_offices
 
         settings = Settings(history_dir=tmp_path)
         self._offices = load_offices(settings.offices_path)

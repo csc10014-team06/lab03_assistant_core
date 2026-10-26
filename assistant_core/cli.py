@@ -4,6 +4,11 @@ import argparse
 import logging
 import sys
 
+from assistant_core.config import Settings, load_settings
+from assistant_core.data_loader import DataLoadError, load_handbook, load_offices
+from assistant_core.llm import DemoLLM
+from assistant_core.service import AssistantService
+
 logger = logging.getLogger("assistant_core")
 
 
@@ -19,7 +24,22 @@ def setup_logging(debug: bool = False) -> None:
         logger.addHandler(handler)
 
 
-def run_repl(service=None) -> None:
+def build_service(settings: Settings) -> AssistantService:
+    """Load the data files and wire up the service; missing data is logged, not fatal."""
+    try:
+        offices = load_offices(settings.offices_path)
+    except DataLoadError as exc:
+        logger.warning("Continuing without offices: %s", exc)
+        offices = {}
+    try:
+        rules = load_handbook(settings.handbook_path)
+    except DataLoadError as exc:
+        logger.warning("Continuing without handbook: %s", exc)
+        rules = []
+    return AssistantService(settings, offices, rules, DemoLLM())
+
+
+def run_repl(service: AssistantService) -> None:
     """Run interactive REPL loop."""
     print("Study Assistant Core. Type 'quit' to exit.")
     while True:
@@ -35,11 +55,7 @@ def run_repl(service=None) -> None:
             print("Goodbye!")
             break
 
-        if service:
-            res = service.handle(prompt)
-            print(res)
-        else:
-            print(f"Echo: {prompt}")
+        print(service.handle(prompt))
 
 
 def main(args: list[str] | None = None) -> int:
@@ -49,17 +65,19 @@ def main(args: list[str] | None = None) -> int:
     parser.add_argument("--debug", action="store_true", help="Enable debug logging output")
 
     parsed_args = parser.parse_args(args)
-    setup_logging(debug=parsed_args.debug)
+    settings = load_settings()
+    setup_logging(debug=parsed_args.debug or settings.debug)
 
     logger.debug("Starting Assistant Core CLI...")
+    service = build_service(settings)
 
     if parsed_args.message:
         # One-shot
-        logger.info("Executing in one-shot mode")
-        print(f"Echo: {parsed_args.message}")
+        logger.debug("Executing in one-shot mode")
+        print(service.handle(parsed_args.message))
     else:
         # REPL
-        run_repl()
+        run_repl(service)
 
     return 0
 
