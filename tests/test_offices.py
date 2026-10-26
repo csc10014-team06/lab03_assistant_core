@@ -93,6 +93,8 @@ class TestFindOfficeMisses:
             (""),
             ("    "),
             ("\n\t  "),
+            # Whole-word boundary prevents substring false positives (team-plan.md §5 line 78)
+            ("I talked to a librarian yesterday"),
         ],
     )
     def test_find_office_returns_none_when_no_match(self, sample_offices, query):
