@@ -39,9 +39,22 @@ def build_service(settings: Settings) -> AssistantService:
     return AssistantService(settings, offices, rules, DemoLLM())
 
 
+WELCOME_BANNER = """\
+============================================================
+Study Assistant Core
+Ask me questions about:
+  * Offices:   e.g. 'where is the library?', 'health service'
+  * Tuition:   e.g. 'tuition 18 credits 2 retakes', 'fees'
+  * Handbook:  e.g. 'exam absence', 'thesis rule', 'max credits'
+  * Commands:  'stats', 'save <filename>', 'quit'
+Type 'quit' or 'exit' to exit.
+============================================================\
+"""
+
+
 def run_repl(service: AssistantService) -> None:
     """Run interactive REPL loop."""
-    print("Study Assistant Core. Type 'quit' to exit.")
+    print(WELCOME_BANNER)
     while True:
         try:
             prompt = input("> ").strip()
