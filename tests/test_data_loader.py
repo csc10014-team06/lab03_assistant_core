@@ -1,7 +1,7 @@
 import pytest
 
-from assistant_core.data_loader import load_offices, DataLoadError
-from assistant_core.data_loader import load_handbook
+from assistant_core.data_loader import DataLoadError, load_handbook, load_offices
+
 
 def test_load_offices_valid(tmp_path):
     path = tmp_path / "offices.csv"

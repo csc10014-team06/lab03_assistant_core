@@ -1,8 +1,10 @@
 import csv
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class Office:
@@ -54,6 +56,7 @@ def load_offices(path: Path) -> dict[str, Office]:
                 except (ValueError, TypeError, KeyError) as e:
                     raise DataLoadError(f"line {line_num}: {e}") from e
     except FileNotFoundError as e:
+        logger.warning("Office file not found: %s", path)
         raise DataLoadError(f"Office file not found: {path}") from e
 
     return offices
@@ -71,7 +74,7 @@ def load_handbook(path: Path) -> list[Rule]:
             for index, row in enumerate(data, start=1):
                 try:
                     if not isinstance(row, dict):
-                        raise ValueError("entry must be a dictionary")
+                        raise TypeError("entry must be a dictionary")
 
                     rule_id = row["id"]
                     if not isinstance(rule_id, str) or not rule_id.strip():
@@ -96,6 +99,7 @@ def load_handbook(path: Path) -> list[Rule]:
                 except (ValueError, TypeError, KeyError) as e:
                     raise DataLoadError(f"entry {index}: {e}") from e
     except FileNotFoundError as e:
+        logger.warning("Handbook file not found: %s", path)
         raise DataLoadError(f"Handbook file not found: {path}") from e
 
     except json.JSONDecodeError as e:
