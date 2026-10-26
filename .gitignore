@@ -1,6 +1,27 @@
-.env
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache & build
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Testing & Linting cache
 .pytest_cache/
 .ruff_cache/
-.venv/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
