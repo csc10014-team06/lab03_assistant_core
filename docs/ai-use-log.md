@@ -3,6 +3,17 @@
 Record of AI-assistant usage across the refactoring process (as required by `docs/team-plan.md`).
 
 ---
+## Member: han_htg 
+
+### Session 1: CLI and Skeleton Setup
+- **Tool:** Gemini
+- **Usage:** Generated scaffold for `cli.py` using `argparse` with REPL and structured logging support; configured `pyproject.toml` and CLI unit tests.
+- **Human contribution:** Kept CLI structure and REPL logic; updated imports to match team interface contracts; ensured no API keys or sensitive data leak into logs; verified via `pytest tests/test_cli.py -v` (4 passed) and `ruff check .` (all clean).
+
+### Session 2: Integration, Documentation, CI & Worksheets
+- **Tool:** Antigravity (Gemini 3.8 Flash Medium)
+- **Usage:** Generated comprehensive English `README.md` (installation, configuration, one-shot/REPL usage, testing), configured GitHub Actions CI workflow (`.github/workflows/ci.yml`), and drafted the Before/After maintainability comparison and three-sentence summary in `worksheets/before_after_maintainability.md`.
+- **Human contribution:** Verified documentation against codebase CLI options and environment variables; validated CI matrix and workflow syntax; verified all 227 tests pass and linter remains completely clean.
 
 ## Member: vy_th
 
