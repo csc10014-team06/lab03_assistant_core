@@ -127,6 +127,19 @@ Enable verbose debug logs via the `--debug` flag:
 python -m assistant_core "hi" --debug
 ```
 
+### 4. Web API Mode (FastAPI)
+Run the study assistant as an HTTP REST service:
+```bash
+uvicorn assistant_api.main:create_app --factory --reload
+```
+Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in your browser for the interactive OpenAPI / Swagger documentation.
+
+To run manual curl tests:
+```bash
+bash api-tests/curl_tests.sh
+```
+Or import `api-tests/study-assistant.postman_collection.json` into Postman / Bruno.
+
 ---
 
 ## Testing & Code Quality
