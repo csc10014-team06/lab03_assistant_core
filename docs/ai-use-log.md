@@ -51,3 +51,13 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   2. Extracted both destination office and deadline dynamically via named groups in `_ABSENCE_PATTERN` to strictly uphold single source of truth.
   3. Added module constant `_EXAM_ABSENCE_RULE_ID = "H26-7.2"`.
   4. Added unit tests for substring false positive rejection and dynamic office extraction.
+
+### Session 4: Lab 4 H1 (all_offices & test_offices_all)
+- **Date**: 2026-11-06
+- **Tool**: Antigravity (Gemini 3.8 Flash High)
+- **Prompt**: "/plan Bạn đọc qua docs/team-plan-lab04.md để biết task của mình, kết hợp với issue nếu trong plan còn ghi thiếu. Hãy lập plan thực hiện cho mình"
+- **Kept**: Two-phase implementation plan separating independent core domain logic (`all_offices` + unit tests) from the scaffold-dependent API endpoint and contract worksheets.
+- **Changed**:
+  1. Implemented `all_offices(offices: dict[str, Office]) -> list[Office]` in `assistant_core/offices.py` returning offices sorted alphabetically by name.
+  2. Created `tests/test_offices_all.py` with 5 unit tests verifying sorting order, empty dictionary, single item, insertion order independence, and field integrity without modifying any frozen Lab 3 tests.
+  3. Verified 232/232 tests pass and Ruff check clean.

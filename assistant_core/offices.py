@@ -41,3 +41,19 @@ def find_office(text: str, offices: dict[str, Office]) -> Office | None:
         if re.search(pattern, text_lower):
             return office
     return None
+
+
+def all_offices(offices: dict[str, Office]) -> list[Office]:
+    """Return all offices sorted alphabetically by name.
+
+    Parameters
+    ----------
+    offices:
+        Mapping of office keys to Office dataclasses.
+
+    Returns
+    -------
+    list[Office]:
+        Offices sorted in ascending order of their `name` attribute.
+    """
+    return sorted(offices.values(), key=lambda o: o.name)
