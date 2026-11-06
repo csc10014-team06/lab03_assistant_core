@@ -29,6 +29,7 @@ from assistant_core.data_loader import Office, Rule
 from assistant_core.fees import FeeQuery, TooManyCreditsError, compute_tuition, parse_fee_query
 from assistant_core.handbook import best_rule
 from assistant_core.llm import LLMClient, LLMError
+from assistant_core.models import Intent, Message, Response, Source
 from assistant_core.offices import find_office
 
 log = logging.getLogger(__name__)
@@ -126,6 +127,62 @@ class AssistantService:
 
         return "Sorry I dont know"
 
+    def respond(self, msg: Message) -> Response:
+        """Process a structured *msg* and return a typed :class:`Response`.
+
+        Used by the HTTP API. Unlike handle():
+        - Fee answers format amounts with commas: ``f"Your tuition is {total:,} VND."``
+        - Rule answers omit the ``(source: ...)`` suffix and populate ``sources``.
+        - LLM errors set ``degraded=True`` and fall back to the raw rule text.
+        - CLI commands (history, stats, save) are not executed; they are treated
+          as normal text queries to avoid exposing internal state over HTTP.
+        """
+        m = msg.text.lower().strip()
+
+        if m in {"hi", "hello", "hey", "xin chao"}:
+            return Response(
+                answer="Hello! I can help with offices, fees and rules.",
+                intent=Intent.GREETING,
+                sources=[],
+                degraded=False,
+            )
+
+        if _FEE_PATTERN.search(m):
+            return self._respond_fee(msg.text)
+
+        office = find_office(msg.text, self._offices)
+        if office is not None:
+            return Response(
+                answer=f"{office.name}: room {office.room}, open {office.hours}",
+                intent=Intent.OFFICE,
+                sources=[],
+                degraded=False,
+            )
+
+        rule = best_rule(msg.text, self._rules)
+        if rule is not None:
+            return self._respond_rule(rule, msg.text)
+
+        return Response(
+            answer="Sorry I dont know",
+            intent=Intent.UNKNOWN,
+            sources=[],
+            degraded=False,
+        )
+
+    def offices(self) -> list[Office]:
+        """Return all offices sorted by name.
+
+        Delegates to offices.all_offices (truyen_lp's H1), falling back to
+        a sorted list of offices when all_offices is not yet available.
+        """
+        try:
+            from assistant_core.offices import all_offices  # type: ignore[attr-defined]
+
+            return all_offices(self._offices)
+        except (ImportError, AttributeError):
+            return sorted(self._offices.values(), key=lambda o: o.name)
+
     def stats(self) -> dict[str, int]:
         """Return intent counts for all messages seen so far.
 
@@ -176,6 +233,32 @@ class AssistantService:
             return "too many credits"
         return f"Your tuition is {total} VND"
 
+    def _respond_fee(self, message: str) -> Response:
+        """Parse and compute tuition formatted with thousands separators for HTTP API."""
+        query: FeeQuery = parse_fee_query(message)
+        if query.credits == 0:
+            return Response(
+                answer="How many credits?",
+                intent=Intent.FEE,
+                sources=[],
+                degraded=False,
+            )
+        try:
+            total = compute_tuition(query, self._settings)
+        except TooManyCreditsError:
+            return Response(
+                answer="too many credits",
+                intent=Intent.FEE,
+                sources=[],
+                degraded=False,
+            )
+        return Response(
+            answer=f"Your tuition is {total:,} VND.",
+            intent=Intent.FEE,
+            sources=[],
+            degraded=False,
+        )
+
     def _handle_rule(self, rule: Rule, original_message: str) -> str:
         """Ask the LLM about *rule*; fall back to raw text on failure."""
         prompt = f"Answer using this rule: {rule.text} Question: {original_message}"
@@ -185,3 +268,24 @@ class AssistantService:
         except LLMError as exc:
             log.warning("LLM failed, falling back to rule text: %s", exc)
             return f"{rule.text} (source: {rule.id})"
+
+    def _respond_rule(self, rule: Rule, original_message: str) -> Response:
+        """Ask the LLM about *rule*; on failure fall back to raw rule text with degraded=True."""
+        prompt = f"Answer using this rule: {rule.text} Question: {original_message}"
+        source = Source(id=rule.id, title=rule.title)
+        try:
+            answer = self._llm.complete(prompt)
+            return Response(
+                answer=answer,
+                intent=Intent.RULE,
+                sources=[source],
+                degraded=False,
+            )
+        except LLMError as exc:
+            log.warning("LLM failed, falling back to rule text: %s", exc)
+            return Response(
+                answer=rule.text,
+                intent=Intent.RULE,
+                sources=[source],
+                degraded=True,
+            )
