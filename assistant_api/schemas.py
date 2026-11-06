@@ -48,3 +48,9 @@ class ErrorBody(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: ErrorBody
+
+
+class OfficeOut(BaseModel):
+    name: str
+    room: str
+    hours: str
