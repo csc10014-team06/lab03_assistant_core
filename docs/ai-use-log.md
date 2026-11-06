@@ -68,3 +68,11 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   1. Enforced thousands separators on fee responses for API compatibility (`9,450,000 VND.`).
   2. Isolated CLI commands (`save`, `history`, `stats`) from HTTP execution to prevent unauthorized filesystem access or internal state leaks.
   3. Ensured `handle()` and all Week 3 tests remain completely untouched and green.
+## Member: nhat_npm
+
+### Session: Lab 4 Weather Endpoint (T4)
+- **Date**: 2026-11-07
+- **Tool**: OpenAI Codex
+- **Prompt**: "Merge new content from main into our branch" and implement the assigned T4 weather endpoint.
+- **Kept**: The scaffold contract: return client weather results, preserve stale-cache responses, and map `ExternalServiceError` to the standard HTTP 503 error.
+- **Changed**: Implemented `/v1/weather`, added its three required API tests, and completed `worksheets/external_api_failure.md` using the provided `WeatherClient` behavior.

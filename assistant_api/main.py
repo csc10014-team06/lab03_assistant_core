@@ -12,8 +12,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from assistant_api.ratelimit import RateLimiter
-from assistant_api.schemas import ChatRequest, ChatResponse, ErrorResponse, FeedbackIn, FeedbackOut, Weather
-from assistant_api.weather import WeatherClient
+from assistant_api.schemas import (
+    ChatRequest,
+    ChatResponse,
+    ErrorResponse,
+    FeedbackIn,
+    FeedbackOut,
+    Weather,
+)
+from assistant_api.weather import ExternalServiceError, WeatherClient
 from assistant_core.cli import build_service
 from assistant_core.config import Settings, load_settings
 from assistant_core.service import AssistantService
@@ -83,9 +90,13 @@ def create_app(
 
     @app.get("/v1/weather", response_model=Weather, tags=["external"], responses={503: {"model": ErrorResponse}})
     def campus_weather() -> Weather:
-        # TODO T4 (4 lines): call weather.current() inside try/except.
-        #   If ExternalServiceError happens, raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-        #   "Weather service unavailable") from None
-        raise NotImplementedError("T4")
+        # Stale cached data remains a successful result; only a complete client
+        # failure is translated to the API's standard 503 error envelope.
+        try:
+            return weather.current()
+        except ExternalServiceError:
+            raise HTTPException(
+                status.HTTP_503_SERVICE_UNAVAILABLE, "Weather service unavailable"
+            ) from None
 
     return app
