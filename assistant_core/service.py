@@ -29,7 +29,7 @@ from assistant_core.data_loader import Office, Rule
 from assistant_core.fees import FeeQuery, TooManyCreditsError, compute_tuition, parse_fee_query
 from assistant_core.handbook import best_rule
 from assistant_core.llm import LLMClient, LLMError
-from assistant_core.models import Intent, Message, Response
+from assistant_core.models import Intent, Message, Response, Source
 from assistant_core.offices import find_office
 
 log = logging.getLogger(__name__)
@@ -150,6 +150,19 @@ class AssistantService:
         if _FEE_PATTERN.search(m):
             return self._respond_fee(msg.text)
 
+        office = find_office(msg.text, self._offices)
+        if office is not None:
+            return Response(
+                answer=f"{office.name}: room {office.room}, open {office.hours}",
+                intent=Intent.OFFICE,
+                sources=[],
+                degraded=False,
+            )
+
+        rule = best_rule(msg.text, self._rules)
+        if rule is not None:
+            return self._respond_rule(rule, msg.text)
+
         return Response(
             answer="Sorry I dont know",
             intent=Intent.UNKNOWN,
@@ -255,3 +268,24 @@ class AssistantService:
         except LLMError as exc:
             log.warning("LLM failed, falling back to rule text: %s", exc)
             return f"{rule.text} (source: {rule.id})"
+
+    def _respond_rule(self, rule: Rule, original_message: str) -> Response:
+        """Ask the LLM about *rule*; on failure fall back to raw rule text with degraded=True."""
+        prompt = f"Answer using this rule: {rule.text} Question: {original_message}"
+        source = Source(id=rule.id, title=rule.title)
+        try:
+            answer = self._llm.complete(prompt)
+            return Response(
+                answer=answer,
+                intent=Intent.RULE,
+                sources=[source],
+                degraded=False,
+            )
+        except LLMError as exc:
+            log.warning("LLM failed, falling back to rule text: %s", exc)
+            return Response(
+                answer=rule.text,
+                intent=Intent.RULE,
+                sources=[source],
+                degraded=True,
+            )

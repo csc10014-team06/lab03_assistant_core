@@ -152,3 +152,73 @@ def test_respond_unknown():
     assert resp.answer == "Sorry I dont know"
     assert resp.sources == []
     assert resp.degraded is False
+
+
+def test_respond_office():
+    from assistant_core.config import Settings
+    from assistant_core.data_loader import Office
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    offices_dict = {
+        "library": Office(name="Library", room="B.201", hours="Mon-Sat 07:00-20:00")
+    }
+    service = AssistantService(Settings(), offices_dict, [], FakeLLM())
+    resp = service.respond(Message(text="where is the library"))
+    assert resp.intent == Intent.OFFICE
+    assert resp.answer == "Library: room B.201, open Mon-Sat 07:00-20:00"
+    assert resp.sources == []
+    assert resp.degraded is False
+
+
+def test_respond_rule_with_source():
+    from assistant_core.config import Settings
+    from assistant_core.data_loader import Rule
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    rule = Rule(
+        id="academic-retake",
+        title="Course Retake Policy",
+        text="Students may retake a course up to 2 times.",
+    )
+    llm = FakeLLM(response="Yes, you can retake up to two times.")
+    service = AssistantService(Settings(), {}, [rule], llm)
+
+    resp = service.respond(Message(text="can I retake a course?"))
+    assert resp.intent == Intent.RULE
+    # answer must NOT contain (source: ...) suffix
+    assert "(source:" not in resp.answer
+    assert resp.answer == "Yes, you can retake up to two times."
+    assert len(resp.sources) == 1
+    assert resp.sources[0].id == "academic-retake"
+    assert resp.sources[0].title == "Course Retake Policy"
+    assert resp.degraded is False
+
+
+def test_respond_rule_llm_failure_degraded():
+    from assistant_core.config import Settings
+    from assistant_core.data_loader import Rule
+    from assistant_core.llm import LLMClient, LLMError
+    from assistant_core.service import AssistantService
+
+    class FailingLLM(LLMClient):
+        def complete(self, prompt: str) -> str:
+            raise LLMError("API timed out")
+
+    rule = Rule(
+        id="academic-retake",
+        title="Course Retake Policy",
+        text="Students may retake a course up to 2 times.",
+    )
+    service = AssistantService(Settings(), {}, [rule], FailingLLM())
+
+    resp = service.respond(Message(text="can I retake a course?"))
+    assert resp.intent == Intent.RULE
+    # On LLM failure, fallback to raw rule text without (source: ...) and degraded=True
+    assert "(source:" not in resp.answer
+    assert resp.answer == "Students may retake a course up to 2 times."
+    assert len(resp.sources) == 1
+    assert resp.sources[0].id == "academic-retake"
+    assert resp.sources[0].title == "Course Retake Policy"
+    assert resp.degraded is True
