@@ -21,10 +21,31 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Human contribution:** Verified endpoint routing structure against team contract; tested `/health` and OpenAPI `/docs` specification; ensured backward compatibility with Lab 3 tests.
 
 ## Member: vy_th
-
+### Session 1: Lab 3 Data Loader Implementation and Testing
+- **Date**: 2026-10-26
 - **Tool**: ChatGPT
-- **Usage**: Reviewed CSV/JSON loading logic, validation, exception handling, pytest tests, and Ruff warnings.
-- **Human contribution**: Implemented and revised the loaders, checked suggestions, and ran tests locally.
+- **Prompt**: "Help me implement and test the CSV/JSON data loader for the Lab 3 assistant_core refactoring project."
+- **Kept**: The implementation of `load_offices()` and `load_handbook()`, data models (`Office`, `Rule`), input validation, exception handling with `DataLoadError`, and unit tests in `tests/test_data_loader.py`.
+- **Changed**:
+  1. Added validation for required CSV headers and office records.
+  2. Validated handbook JSON structure and rule fields before constructing objects.
+  3. Added error handling for missing files, malformed data, and invalid field values.
+  4. Organized the implementation with type hints and frozen dataclasses.
+  5. Reviewed Ruff warnings and refined the code to follow project conventions.
+- **Verification**: Ran 9 data-loader unit tests successfully and checked Ruff for code quality.
+
+### Session 2: Lab 4 Chat Endpoint and Rate Limiting
+- **Date**: 2026-11-07
+- **Tool**: ChatGPT
+- **Prompt**: "Guide me through implementing T1 POST /v1/chat and Part F rate limiting according to docs/team-plan-lab04.md."
+- **Kept**: The chat endpoint implementation using `AssistantService.respond(Message(...))`, UUID-based request IDs, per-client rate limiting with HTTP 429 responses, and three API tests covering tuition calculation, request validation, and rate limiting.
+- **Changed**:
+  1. Used `service.respond()` instead of the starter's `service.handle()` to match the team's Lab 4 interface.
+  2. Integrated rate limiting into the existing `chat()` endpoint without modifying other members' endpoints.
+  3. Recreated the Python virtual environment after identifying that the shell was using Homebrew Python instead of the project's virtual environment.
+  4. Fixed import formatting using Ruff.
+  5. Separated the chat endpoint, rate limiting, and API tests into three Git commits.
+- **Verification**: All three targeted API tests passed, and Ruff reported `All checks passed!`.
 
 ## Member: truyen_lp
 
