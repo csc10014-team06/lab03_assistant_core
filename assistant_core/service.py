@@ -29,6 +29,7 @@ from assistant_core.data_loader import Office, Rule
 from assistant_core.fees import FeeQuery, TooManyCreditsError, compute_tuition, parse_fee_query
 from assistant_core.handbook import best_rule
 from assistant_core.llm import LLMClient, LLMError
+from assistant_core.models import Intent, Message, Response
 from assistant_core.offices import find_office
 
 log = logging.getLogger(__name__)
@@ -126,6 +127,36 @@ class AssistantService:
 
         return "Sorry I dont know"
 
+    def respond(self, msg: Message) -> Response:
+        """Process a structured *msg* and return a typed :class:`Response`.
+
+        Used by the HTTP API. Unlike handle():
+        - Fee answers format amounts with commas: ``f"Your tuition is {total:,} VND."``
+        - Rule answers omit the ``(source: ...)`` suffix and populate ``sources``.
+        - LLM errors set ``degraded=True`` and fall back to the raw rule text.
+        - CLI commands (history, stats, save) are not executed; they are treated
+          as normal text queries to avoid exposing internal state over HTTP.
+        """
+        m = msg.text.lower().strip()
+
+        if m in {"hi", "hello", "hey", "xin chao"}:
+            return Response(
+                answer="Hello! I can help with offices, fees and rules.",
+                intent=Intent.GREETING,
+                sources=[],
+                degraded=False,
+            )
+
+        if _FEE_PATTERN.search(m):
+            return self._respond_fee(msg.text)
+
+        return Response(
+            answer="Sorry I dont know",
+            intent=Intent.UNKNOWN,
+            sources=[],
+            degraded=False,
+        )
+
     def offices(self) -> list[Office]:
         """Return all offices sorted by name.
 
@@ -188,6 +219,32 @@ class AssistantService:
         except TooManyCreditsError:
             return "too many credits"
         return f"Your tuition is {total} VND"
+
+    def _respond_fee(self, message: str) -> Response:
+        """Parse and compute tuition formatted with thousands separators for HTTP API."""
+        query: FeeQuery = parse_fee_query(message)
+        if query.credits == 0:
+            return Response(
+                answer="How many credits?",
+                intent=Intent.FEE,
+                sources=[],
+                degraded=False,
+            )
+        try:
+            total = compute_tuition(query, self._settings)
+        except TooManyCreditsError:
+            return Response(
+                answer="too many credits",
+                intent=Intent.FEE,
+                sources=[],
+                degraded=False,
+            )
+        return Response(
+            answer=f"Your tuition is {total:,} VND.",
+            intent=Intent.FEE,
+            sources=[],
+            degraded=False,
+        )
 
     def _handle_rule(self, rule: Rule, original_message: str) -> str:
         """Ask the LLM about *rule*; fall back to raw text on failure."""

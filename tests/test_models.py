@@ -85,3 +85,70 @@ def test_service_offices_delegates_to_all_offices(monkeypatch):
     monkeypatch.setattr(offices_mod, "all_offices", mock_all_offices, raising=False)
     service = AssistantService(Settings(), offices_dict, [], FakeLLM())
     assert service.offices() == [sentinel_office]
+
+
+def test_respond_greeting():
+    from assistant_core.config import Settings
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    service = AssistantService(Settings(), {}, [], FakeLLM())
+    resp = service.respond(Message(text="hello"))
+    assert resp.intent == Intent.GREETING
+    assert resp.answer == "Hello! I can help with offices, fees and rules."
+    assert resp.sources == []
+    assert resp.degraded is False
+
+
+def test_respond_fee_with_thousands_separator():
+    from assistant_core.config import Settings
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    # 18 credits * 450,000 + 2 retakes * 1.5 * 450,000 = 8,100,000 + 1,350,000 = 9,450,000
+    service = AssistantService(
+        Settings(credit_rate=450_000, retake_multiplier=1.5, max_credits=30),
+        {},
+        [],
+        FakeLLM(),
+    )
+    resp = service.respond(Message(text="tuition for 18 credits and 2 retake"))
+    assert resp.intent == Intent.FEE
+    assert resp.answer == "Your tuition is 9,450,000 VND."
+    assert resp.sources == []
+    assert resp.degraded is False
+
+
+def test_respond_fee_zero_credits():
+    from assistant_core.config import Settings
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    service = AssistantService(Settings(), {}, [], FakeLLM())
+    resp = service.respond(Message(text="what is the tuition fee?"))
+    assert resp.intent == Intent.FEE
+    assert resp.answer == "How many credits?"
+
+
+def test_respond_fee_too_many_credits():
+    from assistant_core.config import Settings
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    service = AssistantService(Settings(max_credits=30), {}, [], FakeLLM())
+    resp = service.respond(Message(text="tuition for 35 credits"))
+    assert resp.intent == Intent.FEE
+    assert resp.answer == "too many credits"
+
+
+def test_respond_unknown():
+    from assistant_core.config import Settings
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    service = AssistantService(Settings(), {}, [], FakeLLM())
+    resp = service.respond(Message(text="random unrelated query"))
+    assert resp.intent == Intent.UNKNOWN
+    assert resp.answer == "Sorry I dont know"
+    assert resp.sources == []
+    assert resp.degraded is False
