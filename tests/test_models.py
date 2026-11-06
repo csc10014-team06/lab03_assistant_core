@@ -222,3 +222,58 @@ def test_respond_rule_llm_failure_degraded():
     assert resp.sources[0].id == "academic-retake"
     assert resp.sources[0].title == "Course Retake Policy"
     assert resp.degraded is True
+
+
+def test_respond_security_save_does_not_write_file(tmp_path):
+    from assistant_core.config import Settings
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    settings = Settings(history_dir=tmp_path)
+    service = AssistantService(settings, {}, [], FakeLLM())
+
+    # In HTTP respond(), "save malicious.txt" must NOT run as a CLI command or write files
+    resp = service.respond(Message(text="save malicious.txt"))
+    assert resp.intent == Intent.UNKNOWN
+    assert resp.answer != "saved"
+    # Ensure no file was created in history_dir
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_respond_security_history_and_stats_not_exposed():
+    from assistant_core.config import Settings
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    service = AssistantService(Settings(), {}, [], FakeLLM())
+    service.handle("hello")
+    service.handle("where is the library")
+
+    # In HTTP respond(), "history" and "stats" are treated as regular text
+    resp_history = service.respond(Message(text="history"))
+    assert resp_history.intent == Intent.UNKNOWN
+    assert "hello" not in resp_history.answer
+
+    resp_stats = service.respond(Message(text="stats"))
+    assert resp_stats.intent == Intent.UNKNOWN
+    assert "fee=" not in resp_stats.answer
+
+
+def test_handle_unchanged():
+    from assistant_core.config import Settings
+    from assistant_core.data_loader import Office, Rule
+    from assistant_core.llm import FakeLLM
+    from assistant_core.service import AssistantService
+
+    settings = Settings(credit_rate=450_000, retake_multiplier=1.5, max_credits=30)
+    offices = {"library": Office(name="Library", room="B.201", hours="07:00-20:00")}
+    rule = Rule(id="R1", title="Rule 1", text="Rule text here")
+    service = AssistantService(settings, offices, [rule], FakeLLM(response="AI explanation"))
+
+    # handle() must still return the exact strings expected by Lab 3 tests:
+    # 1. Tuition without comma separators or trailing period:
+    assert service.handle("tuition for 18 credits and 2 retake") == "Your tuition is 9450000 VND"
+    # 2. Rule with (source: ...) suffix:
+    assert service.handle("Rule text here") == "AI explanation (source: R1)"
+    # 3. CLI commands work as usual in handle():
+    assert "tuition for 18 credits and 2 retake" in service.handle("history")

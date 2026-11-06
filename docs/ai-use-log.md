@@ -51,3 +51,15 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   2. Extracted both destination office and deadline dynamically via named groups in `_ABSENCE_PATTERN` to strictly uphold single source of truth.
   3. Added module constant `_EXAM_ABSENCE_RULE_ID = "H26-7.2"`.
   4. Added unit tests for substring false positive rejection and dynamic office extraction.
+
+## Member: nhat_dm
+
+### Session: Lab 4 Service Bridge & Data Models
+- **Date**: 2026-11-06
+- **Tool**: Antigravity (Gemini 3.8 Flash Medium)
+- **Prompt**: Implement models.py, AssistantService.respond(), and AssistantService.offices() according to docs/team-plan-lab04.md and issue #14.
+- **Kept**: Pydantic models for Intent, Message, Source, Response; respond() routing logic for greeting, fee, office, handbook rule, unknown intent, and degraded state on LLMError; offices() stand-in delegation; comprehensive test suite in tests/test_models.py.
+- **Changed**:
+  1. Enforced thousands separators on fee responses for API compatibility (`9,450,000 VND.`).
+  2. Isolated CLI commands (`save`, `history`, `stats`) from HTTP execution to prevent unauthorized filesystem access or internal state leaks.
+  3. Ensured `handle()` and all Week 3 tests remain completely untouched and green.
