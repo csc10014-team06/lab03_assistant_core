@@ -36,6 +36,13 @@ class Settings:
     debug: bool = False
     data_dir: Path = PACKAGE_DIR / "data"
     history_dir: Path = field(default_factory=Path.cwd)
+    # --- Lab 4: HTTP API -------------------------------------------------
+    api_admin_key: str | None = field(default=None, repr=False)  # guards GET /v1/feedback
+    weather_url: str = "https://api.open-meteo.com/v1/forecast"
+    weather_timeout_s: float = 3.0  # wait at most this long for the weather site
+    campus_lat: float = 10.7626  # University of Science, HCMC (Nguyen Van Cu campus)
+    campus_lon: float = 106.6822
+    rate_limit_per_min: int = 30  # max POST /v1/chat requests per client per minute
 
     def __post_init__(self) -> None:
         if self.credit_rate <= 0:
@@ -46,6 +53,14 @@ class Settings:
             )
         if self.max_credits <= 0:
             raise ConfigError(f"max_credits must be positive, got {self.max_credits}")
+        if not self.weather_timeout_s > 0:  # also rejects NaN
+            raise ConfigError(f"weather_timeout_s must be positive, got {self.weather_timeout_s}")
+        if self.rate_limit_per_min <= 0:
+            raise ConfigError(f"rate_limit_per_min must be positive, got {self.rate_limit_per_min}")
+        if not -90 <= self.campus_lat <= 90:
+            raise ConfigError(f"campus_lat must be between -90 and 90, got {self.campus_lat}")
+        if not -180 <= self.campus_lon <= 180:
+            raise ConfigError(f"campus_lon must be between -180 and 180, got {self.campus_lon}")
 
     @property
     def offices_path(self) -> Path:
@@ -109,5 +124,17 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         overrides["data_dir"] = Path(raw)
     if raw := get("HISTORY_DIR"):
         overrides["history_dir"] = Path(raw)
+    if raw := get("API_ADMIN_KEY"):
+        overrides["api_admin_key"] = raw
+    if raw := get("WEATHER_URL"):
+        overrides["weather_url"] = raw
+    if (raw := get("WEATHER_TIMEOUT_S")) is not None:
+        overrides["weather_timeout_s"] = _parse_float("ASSISTANT_WEATHER_TIMEOUT_S", raw)
+    if (raw := get("CAMPUS_LAT")) is not None:
+        overrides["campus_lat"] = _parse_float("ASSISTANT_CAMPUS_LAT", raw)
+    if (raw := get("CAMPUS_LON")) is not None:
+        overrides["campus_lon"] = _parse_float("ASSISTANT_CAMPUS_LON", raw)
+    if (raw := get("RATE_LIMIT_PER_MIN")) is not None:
+        overrides["rate_limit_per_min"] = _parse_int("ASSISTANT_RATE_LIMIT_PER_MIN", raw)
 
     return Settings(**overrides)  # type: ignore[arg-type]
