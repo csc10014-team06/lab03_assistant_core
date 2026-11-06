@@ -4,12 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "assistant-core"
-version = "0.3.0"
-description = "Refactored study-assistant package (Lab 3)"
+version = "0.4.0"
+description = "Study-assistant package and its HTTP API (Lab 3-4)"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.7,<3",
     "python-dotenv>=1.0,<2",
+    "fastapi>=0.115,<0.116",
+    "httpx>=0.27,<0.28",
+    "uvicorn>=0.30,<0.31",
 ]
 
 [project.scripts]
@@ -17,7 +20,7 @@ assistant = "assistant_core.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["assistant_core*"]
+include = ["assistant_core*", "assistant_api*"]
 
 [tool.setuptools.package-data]
 "assistant_core" = ["data/*"]
@@ -36,3 +39,6 @@ exclude = [
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "BLE"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["assistant_core", "assistant_api"]

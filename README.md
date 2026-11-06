@@ -76,6 +76,11 @@ Available environment variables:
 | `ASSISTANT_MAX_CREDITS` | `30` | Maximum allowed credits per semester |
 | `ASSISTANT_DATA_DIR` | `assistant_core/data` | Path to office and handbook data |
 | `ASSISTANT_HISTORY_DIR` | Current working directory | Directory to save session logs |
+| `ASSISTANT_API_ADMIN_KEY` | `None` | Key for the admin-only `GET /v1/feedback` (header `X-API-Key`); never logged or in `repr()` |
+| `ASSISTANT_WEATHER_URL` | `https://api.open-meteo.com/v1/forecast` | Weather service used by `GET /v1/weather` |
+| `ASSISTANT_WEATHER_TIMEOUT_S` | `3` | Seconds to wait for the weather service |
+| `ASSISTANT_CAMPUS_LAT` / `ASSISTANT_CAMPUS_LON` | `10.7626` / `106.6822` | Campus coordinates for the weather request |
+| `ASSISTANT_RATE_LIMIT_PER_MIN` | `30` | Max `POST /v1/chat` requests per client per minute |
 
 ---
 
@@ -121,6 +126,19 @@ Enable verbose debug logs via the `--debug` flag:
 ```bash
 python -m assistant_core "hi" --debug
 ```
+
+### 4. Web API Mode (FastAPI)
+Run the study assistant as an HTTP REST service:
+```bash
+uvicorn assistant_api.main:create_app --factory --reload
+```
+Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in your browser for the interactive OpenAPI / Swagger documentation.
+
+To run manual curl tests:
+```bash
+bash api-tests/curl_tests.sh
+```
+Or import `api-tests/study-assistant.postman_collection.json` into Postman / Bruno.
 
 ---
 
