@@ -8,7 +8,7 @@ Fill in one row per endpoint **before** you code it.
 | POST | /v1/chat | | | | UI, tests |
 | POST | /v1/feedback | | | | UI |
 | GET | /v1/feedback | header X-API-Key | | | staff dashboard |
-| GET | /v1/weather | — | | | UI |
+| GET | /v1/weather | — | 200 `{temperature_c, wind_kmh, description, observed_at, stale}`; `stale: true` means cached weather | 503 `weather_service_unavailable` when there is no usable cached result | UI shows current or last cached weather; otherwise “Weather service unavailable” |
 
 Questions:
 1. Which fields are required, and what are their limits?
