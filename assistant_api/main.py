@@ -65,6 +65,14 @@ def create_app(
         responses={422: {"model": ErrorResponse}, 429: {"model": ErrorResponse}},
     )
     def chat(req: ChatRequest, request: Request) -> ChatResponse:
+        client = request.client.host if request.client else "unknown"
+
+        if not limiter.allow(client):
+            raise HTTPException(
+                status.HTTP_429_TOO_MANY_REQUESTS,
+                "Too many requests",
+            )
+
         resp = service.respond(
             Message(text=req.message, session_id=req.session_id)
         )
