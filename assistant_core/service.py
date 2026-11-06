@@ -126,6 +126,19 @@ class AssistantService:
 
         return "Sorry I dont know"
 
+    def offices(self) -> list[Office]:
+        """Return all offices sorted by name.
+
+        Delegates to offices.all_offices (truyen_lp's H1), falling back to
+        a sorted list of offices when all_offices is not yet available.
+        """
+        try:
+            from assistant_core.offices import all_offices  # type: ignore[attr-defined]
+
+            return all_offices(self._offices)
+        except (ImportError, AttributeError):
+            return sorted(self._offices.values(), key=lambda o: o.name)
+
     def stats(self) -> dict[str, int]:
         """Return intent counts for all messages seen so far.
 
