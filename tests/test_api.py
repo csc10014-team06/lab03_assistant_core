@@ -116,4 +116,21 @@ def test_weather_stale_cache_when_upstream_fails(settings, service):
 
 
 # --- H1 offices (truyen_lp) ---
-# truyen_lp will paste: test_offices_ok, test_offices_contains_library
+def test_offices_ok(client):
+    r = client.get("/v1/offices")
+    assert r.status_code == 200
+    data = r.json()
+    assert isinstance(data, list)
+    names = [item["name"] for item in data]
+    assert names == sorted(names)
+    assert names == ["IT Helpdesk", "Library", "Student Affairs", "Training Office"]
+
+
+def test_offices_contains_library(client):
+    r = client.get("/v1/offices")
+    assert r.status_code == 200
+    data = r.json()
+    library = next((item for item in data if item["name"] == "Library"), None)
+    assert library is not None
+    assert library["room"] == "B.201"
+    assert "Mon-Sat" in library["hours"]

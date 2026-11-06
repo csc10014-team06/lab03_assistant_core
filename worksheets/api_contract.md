@@ -9,9 +9,9 @@ Fill in one row per endpoint **before** you code it.
 | POST | /v1/feedback | | | | UI |
 | GET | /v1/feedback | header X-API-Key | | | staff dashboard |
 | GET | /v1/weather | — | 200 `{temperature_c, wind_kmh, description, observed_at, stale}`; `stale: true` means cached weather | 503 `weather_service_unavailable` when there is no usable cached result | UI shows current or last cached weather; otherwise “Weather service unavailable” |
+| GET | /v1/offices | — | 200 `list[OfficeOut]` (`[{name, room, hours}, ...]`), sorted alphabetically by name | — | UI, tests, student lookup |
 
 Questions:
 1. Which fields are required, and what are their limits?
 2. What does the UI show for each error code?
 3. What changes would force a `/v2`?
-
