@@ -63,7 +63,16 @@ def test_health(client):
 
 
 # --- T2/T3 feedback (dieu_sp) ---
-# dieu_sp will paste: test_feedback_roundtrip, test_feedback_rating_out_of_range
+def test_feedback_roundtrip(client):
+    r = client.post("/v1/feedback", json={"request_id": "abc123", "rating": 1})
+    assert r.status_code == 201 and r.json()["id"] == 1
+    assert client.get("/v1/feedback").status_code == 401
+    listed = client.get("/v1/feedback", headers={"X-API-Key": "secret-admin"})
+    assert listed.status_code == 200 and len(listed.json()) == 1
+
+
+def test_feedback_rating_out_of_range(client):
+    assert client.post("/v1/feedback", json={"request_id": "x", "rating": 5}).status_code == 422
 
 
 # --- T4 weather (nhat_npm) ---
