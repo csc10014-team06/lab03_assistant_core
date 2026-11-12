@@ -7,6 +7,7 @@ Endpoints (v1): GET /health, POST /v1/chat, POST /v1/feedback, GET /v1/feedback 
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import asdict
 from datetime import datetime, timezone
 
@@ -27,6 +28,7 @@ from assistant_api.schemas import (
 from assistant_api.weather import ExternalServiceError, WeatherClient
 from assistant_core.cli import build_service
 from assistant_core.config import Settings, load_settings
+from assistant_core.models import Message
 from assistant_core.service import AssistantService
 
 
@@ -73,11 +75,22 @@ def create_app(
         responses={422: {"model": ErrorResponse}, 429: {"model": ErrorResponse}},
     )
     def chat(req: ChatRequest, request: Request) -> ChatResponse:
-        # BONUS: rate limiting (see tutorial Part F). Leave it for later.
-        # TODO T1 (2 lines):
-        #   1. resp = service.handle(Message(text=req.message, session_id=req.session_id))
-        #   2. return ChatResponse(**resp.model_dump(), request_id=uuid.uuid4().hex[:12])
-        raise NotImplementedError("T1")
+        client = request.client.host if request.client else "unknown"
+
+        if not limiter.allow(client):
+            raise HTTPException(
+                status.HTTP_429_TOO_MANY_REQUESTS,
+                "Too many requests",
+            )
+
+        resp = service.respond(
+            Message(text=req.message, session_id=req.session_id)
+        )
+
+        return ChatResponse(
+            **resp.model_dump(),
+            request_id=uuid.uuid4().hex[:12],
+        )
 
     @app.post("/v1/feedback", response_model=FeedbackOut, status_code=201, tags=["feedback"])
     def add_feedback(fb: FeedbackIn) -> FeedbackOut:

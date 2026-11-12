@@ -59,7 +59,21 @@ def test_health(client):
 
 
 # --- T1 chat (vy_th) ---
-# vy_th will paste: test_chat_fee, test_chat_validation_error, test_rate_limit
+def test_chat_fee(client):
+    r = client.post("/v1/chat", json={"message": "tuition for 18 credits and 2 retake"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["intent"] == "fee" and "9,450,000" in body["answer"] and body["request_id"]
+
+
+def test_chat_validation_error(client):
+    r = client.post("/v1/chat", json={"message": ""})
+    assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_request"
+
+
+def test_rate_limit(client):
+    codes = [client.post("/v1/chat", json={"message": "hi"}).status_code for _ in range(6)]
+    assert codes[-1] == 429
 
 
 # --- T2/T3 feedback (dieu_sp) ---
