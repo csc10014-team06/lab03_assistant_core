@@ -25,3 +25,11 @@ build/
 Thumbs.db
 .vscode/
 .idea/
+
+# SQLite databases (generated; never commit data)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
