@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "assistant-core"
-version = "0.4.0"
-description = "Study-assistant package and its HTTP API (Lab 3-4)"
+version = "0.5.0"
+description = "Study-assistant package and its HTTP API (Lab 3-5)"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.7,<3",
@@ -13,6 +13,7 @@ dependencies = [
     "fastapi>=0.115,<0.116",
     "httpx>=0.27,<0.28",
     "uvicorn>=0.30,<0.31",
+    "sqlmodel>=0.0.22,<0.1",
 ]
 
 [project.scripts]
