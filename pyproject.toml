@@ -39,3 +39,6 @@ exclude = [
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "BLE"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["assistant_core", "assistant_api"]
