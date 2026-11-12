@@ -105,6 +105,6 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 ### Session: Lab 5 practice, editor assistant (Q1-Q15, D1-D3)
 - **Date**: 2026-11-12
 - **Tool**: Gemini (chat assistant in the code editor)
-- **Prompt**: Help with completing `school_repo.py` (the D1-D3 functions, including the `transcript` JOIN) and running `pytest`.
-- **Kept**: TO COMPLETE by long_th: what you kept from its suggestions.
-- **Changed**: TO COMPLETE by long_th: what you changed or wrote yourself, and which answers (if any) came from it.
+- **Prompt**: Help with `school_repo.py` (the `transcript` JOIN query, D3) and with running `pytest`.
+- **Kept**: The code it suggested for `school_repo.py`, in particular the `transcript` JOIN query (D3), which is identical to the code shown in its chat panel. It also explained that the `pytest` failure came from an older system Python and how to recreate the virtual environment with Python 3.10.
+- **Changed**: Used its suggestions and then tested them myself: `python check.py` gives 15/15 and `pytest -q test_school_repo.py` gives 5 passed. No other practice answers were taken from it.
