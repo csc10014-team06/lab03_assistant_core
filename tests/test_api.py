@@ -77,11 +77,65 @@ def test_rate_limit(client):
 
 
 # --- T2/T3 feedback (dieu_sp) ---
-# dieu_sp will paste: test_feedback_roundtrip, test_feedback_rating_out_of_range
+def test_feedback_roundtrip(client):
+    r = client.post("/v1/feedback", json={"request_id": "abc123", "rating": 1})
+    assert r.status_code == 201 and r.json()["id"] == 1
+    assert client.get("/v1/feedback").status_code == 401
+    listed = client.get("/v1/feedback", headers={"X-API-Key": "secret-admin"})
+    assert listed.status_code == 200 and len(listed.json()) == 1
+
+
+def test_feedback_rating_out_of_range(client):
+    assert client.post("/v1/feedback", json={"request_id": "x", "rating": 5}).status_code == 422
 
 
 # --- T4 weather (nhat_npm) ---
-# nhat_npm will paste: test_weather_ok, test_weather_down_returns_503, test_weather_stale_cache_when_upstream_fails
+def test_weather_ok(client):
+    r = client.get("/v1/weather")
+    assert r.status_code == 200
+    assert r.json() == {
+        "temperature_c": 31.2,
+        "wind_kmh": 8.5,
+        "description": "overcast",
+        "observed_at": "2026-10-05T09:00",
+        "stale": False,
+    }
+
+
+def test_weather_down_returns_503(settings, service):
+    def upstream_down(_request):
+        return httpx.Response(503)
+
+    weather = weather_with(upstream_down)
+    app = create_app(settings, service, weather)
+    r = TestClient(app).get("/v1/weather")
+    assert r.status_code == 503
+    assert r.json() == {
+        "error": {
+            "code": "weather_service_unavailable",
+            "message": "Weather service unavailable",
+        }
+    }
+
+
+def test_weather_stale_cache_when_upstream_fails(settings, service):
+    responses = iter([httpx.Response(200, json=OK_JSON), httpx.Response(503), httpx.Response(503)])
+    weather = WeatherClient(
+        "https://example.test/forecast",
+        10.76,
+        106.68,
+        retries=1,
+        cache_ttl_s=0,
+        transport=httpx.MockTransport(lambda _request: next(responses)),
+    )
+    client = TestClient(create_app(settings, service, weather))
+
+    first = client.get("/v1/weather")
+    stale = client.get("/v1/weather")
+
+    assert first.status_code == 200 and first.json()["stale"] is False
+    assert stale.status_code == 200 and stale.json()["stale"] is True
+    assert stale.json()["temperature_c"] == 31.2
 
 
 # --- H1 offices (truyen_lp) ---

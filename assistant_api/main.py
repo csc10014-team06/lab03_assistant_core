@@ -8,14 +8,22 @@ Endpoints (v1): GET /health, POST /v1/chat, POST /v1/feedback, GET /v1/feedback 
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from assistant_api.ratelimit import RateLimiter
-from assistant_api.schemas import ChatRequest, ChatResponse, ErrorResponse, FeedbackIn, FeedbackOut, Weather
-from assistant_api.weather import WeatherClient
+from assistant_api.schemas import (
+    ChatRequest,
+    ChatResponse,
+    ErrorResponse,
+    FeedbackIn,
+    FeedbackOut,
+    Weather,
+)
+from assistant_api.weather import ExternalServiceError, WeatherClient
 from assistant_core.cli import build_service
 from assistant_core.config import Settings, load_settings
 from assistant_core.models import Message
@@ -31,7 +39,7 @@ def create_app(
         settings.weather_url, settings.campus_lat, settings.campus_lon, timeout_s=settings.weather_timeout_s
     )
     limiter = RateLimiter(settings.rate_limit_per_min)  # noqa: F841 — used in BONUS task
-    feedback_store: list[FeedbackOut] = []  # noqa: F841 — used in T2/T3
+    feedback_store: list[FeedbackOut] = []
 
     app = FastAPI(
         title="Study Assistant API", version="1.0.0", description="Backend of the CSC10014 Smart Virtual Assistant."
@@ -84,22 +92,24 @@ def create_app(
 
     @app.post("/v1/feedback", response_model=FeedbackOut, status_code=201, tags=["feedback"])
     def add_feedback(fb: FeedbackIn) -> FeedbackOut:
-        # TODO T2 (3 lines):
-        #   1. item = FeedbackOut(**fb.model_dump(), id=len(feedback_store) + 1, created_at=datetime.now(timezone.utc))
-        #   2. add item to feedback_store
-        #   3. return item
-        raise NotImplementedError("T2")
+        item = FeedbackOut(**fb.model_dump(), id=len(feedback_store) + 1, created_at=datetime.now(timezone.utc))
+        feedback_store.append(item)
+        return item
 
     @app.get("/v1/feedback", response_model=list[FeedbackOut], tags=["feedback"], dependencies=[Depends(require_admin)])
     def list_feedback() -> list[FeedbackOut]:
-        # TODO T3 (1 line): return the list. The API-key check is already done by `require_admin` above.
-        raise NotImplementedError("T3")
+        # The API-key check is already done by `require_admin` above.
+        return feedback_store
 
     @app.get("/v1/weather", response_model=Weather, tags=["external"], responses={503: {"model": ErrorResponse}})
     def campus_weather() -> Weather:
-        # TODO T4 (4 lines): call weather.current() inside try/except.
-        #   If ExternalServiceError happens, raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-        #   "Weather service unavailable") from None
-        raise NotImplementedError("T4")
+        # Stale cached data remains a successful result; only a complete client
+        # failure is translated to the API's standard 503 error envelope.
+        try:
+            return weather.current()
+        except ExternalServiceError:
+            raise HTTPException(
+                status.HTTP_503_SERVICE_UNAVAILABLE, "Weather service unavailable"
+            ) from None
 
     return app
