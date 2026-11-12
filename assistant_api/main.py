@@ -8,6 +8,7 @@ Endpoints (v1): GET /health, POST /v1/chat, POST /v1/feedback, GET /v1/feedback 
 from __future__ import annotations
 
 import uuid
+from dataclasses import asdict
 from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
@@ -21,6 +22,7 @@ from assistant_api.schemas import (
     ErrorResponse,
     FeedbackIn,
     FeedbackOut,
+    OfficeOut,
     Weather,
 )
 from assistant_api.weather import ExternalServiceError, WeatherClient
@@ -111,5 +113,9 @@ def create_app(
             raise HTTPException(
                 status.HTTP_503_SERVICE_UNAVAILABLE, "Weather service unavailable"
             ) from None
+
+    @app.get("/v1/offices", response_model=list[OfficeOut], tags=["offices"])
+    def list_offices() -> list[OfficeOut]:
+        return [asdict(o) for o in service.offices()]
 
     return app
