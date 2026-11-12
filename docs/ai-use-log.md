@@ -85,3 +85,26 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Prompt**: Implement issue #17 (T2 `POST /v1/feedback`, T3 `GET /v1/feedback` admin) following `docs/team-plan-lab04.md`.
 - **Kept**: The starter's 3-line T2 body (in-memory `feedback_store`, `id = len + 1`, UTC `created_at`) and the 1-line T3 body relying on the existing `require_admin` dependency.
 - **Changed**: Added the missing `datetime` import, removed the now-unused `noqa`, pasted the starter's `test_feedback_roundtrip` and `test_feedback_rating_out_of_range` unchanged into `tests/test_api.py`, filled the feedback rows of `worksheets/api_contract.md`, and verified 201 / 422 / 401 / 200 with `api-tests/curl_tests.sh`.
+
+## Member: long_th
+
+### Session: Lab 4 config, dependencies and packaging (issue #13)
+- **Date**: 2026-11-05
+- **Tool**: Claude Code
+- **Prompt**: Do the long_th tasks of the Lab 4 plan: add the API settings, merge FastAPI/httpx/uvicorn into the dependency files, package `assistant_api`, extend `.env.example`, add tests.
+- **Kept**: Six new `Settings` fields read from `ASSISTANT_*` variables, the admin key hidden from `repr()`, validation raising `ConfigError`, pinned versions in `requirements.txt` and ranges in `pyproject.toml`, and `tests/test_config_api.py` (24 tests, no existing test modified).
+- **Changed**: The AI-written commit was cherry-picked onto the member's own branch. `ruff check` and `pytest` were run against it (all clean) before it was pushed.
+
+### Session: Lab 5 database settings and review of practice answers (issue #31)
+- **Date**: 2026-11-12
+- **Tool**: Claude Code
+- **Prompt**: (1) Do the long_th config task of the Lab 5 plan: database URL, secret salt for hashing session ids, `sqlmodel` dependency. (2) Review my SQL Q1-Q15 and `school_repo.py` D1-D3 and check the commit on my branch. (3) Draft the H2 question and query (`submissions/lab05/long_th/h2.md`).
+- **Kept**: `db_url` and `hash_salt` settings (salt hidden from `repr()`, minimum length, no default, `require_hash_salt()` failing loudly), `sqlmodel==0.0.22` pinned, and `tests/test_config_db.py` (17 tests, no existing test modified).
+- **Changed**: Claude Code reviewed the practice answers (Q1-Q15, D1-D3; see the next entry for the other assistant used while writing them) and pointed out `con.commit;` (missing parentheses, so inserts were not saved), `credits >= 4` instead of `= 4` in Q6, a missing `ORDER BY` in Q8, and a wrongly named file (`my_answer.sql`). The member fixed the file name, the commit call and Q6; the AI added the Q8 `ORDER BY` and removed stray semicolons/whitespace. The scores in the folder README are the member's own `check.py` / `pytest` results. Claude Code also drafted the H2 question and its SQL query (validated for syntax on a stand-in table); the result and the interpretation in `h2.md` have to come from the member's own seeded `assistant.db`.
+
+### Session: Lab 5 practice, editor assistant (Q1-Q15, D1-D3)
+- **Date**: 2026-11-12
+- **Tool**: Gemini (chat assistant in the code editor)
+- **Prompt**: Help with completing `school_repo.py` (the D1-D3 functions, including the `transcript` JOIN) and running `pytest`.
+- **Kept**: TO COMPLETE by long_th: what you kept from its suggestions.
+- **Changed**: TO COMPLETE by long_th: what you changed or wrote yourself, and which answers (if any) came from it.
