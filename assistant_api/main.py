@@ -1,6 +1,6 @@
-"""FastAPI web application exposing the study assistant core over HTTP.
+"""FastAPI application — Lab 4/5.  Run:  uvicorn assistant_api.main:create_app --factory --reload
 
-Endpoints (v1): GET /health, POST /v1/chat, POST /v1/feedback, GET /v1/feedback, GET /v1/weather
+Endpoints (v1): GET /health, POST /v1/chat, POST /v1/feedback, GET /v1/feedback (admin), GET /v1/weather
 """
 
 from __future__ import annotations
@@ -52,32 +52,37 @@ def create_app(
         title="Study Assistant API", version="1.0.0", description="Backend of the CSC10014 Smart Virtual Assistant."
     )
 
+    def error(code: int, key: str, message: str) -> JSONResponse:
+        return JSONResponse(status_code=code, content={"error": {"code": key, "message": message}})
+
     @app.exception_handler(RequestValidationError)
-    def handle_validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
+    async def on_validation(_: Request, exc: RequestValidationError):
         first = exc.errors()[0]
-        field = first["loc"][-1]
-        msg = first["msg"]
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"error": {"code": "validation_error", "message": f"{field}: {msg}"}},
-        )
+        field = ".".join(str(p) for p in first["loc"][1:]) or "body"
+        return error(422, "invalid_request", f"{field}: {first['msg']}")
 
-    def require_admin(x_admin_key: str | None = Header(default=None)) -> None:
-        if not settings.api_admin_key or x_admin_key != settings.api_admin_key:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin key")
+    @app.exception_handler(HTTPException)
+    async def on_http(_: Request, exc: HTTPException):
+        return error(exc.status_code, str(exc.detail).lower().replace(" ", "_"), str(exc.detail))
 
-    @app.get("/health", tags=["system"])
-    def health() -> dict[str, str]:
-        return {"status": "ok"}
+    def require_admin(x_api_key: str | None = Header(default=None)) -> None:
+        if not settings.api_admin_key or x_api_key != settings.api_admin_key:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Missing or invalid API key")
+
+    @app.get("/health", tags=["ops"])
+    def health() -> dict:
+        return {"status": "ok", "version": app.version}
 
     @app.post(
         "/v1/chat",
         response_model=ChatResponse,
         tags=["chat"],
-        responses={429: {"model": ErrorResponse}},
+        responses={422: {"model": ErrorResponse}, 429: {"model": ErrorResponse}},
     )
-    def chat(req: ChatRequest) -> ChatResponse:
-        if not limiter.allow(req.session_id):
+    def chat(req: ChatRequest, request: Request) -> ChatResponse:
+        client = request.client.host if request.client else "unknown"
+
+        if not limiter.allow(client):
             raise HTTPException(
                 status.HTTP_429_TOO_MANY_REQUESTS,
                 "Too many requests",
@@ -133,13 +138,17 @@ def create_app(
 
     @app.get("/v1/weather", response_model=Weather, tags=["external"], responses={503: {"model": ErrorResponse}})
     def campus_weather() -> Weather:
+        # Stale cached data remains a successful result; only a complete client
+        # failure is translated to the API's standard 503 error envelope.
         try:
             return weather.current()
-        except ExternalServiceError as err:
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=err.message) from err
+        except ExternalServiceError:
+            raise HTTPException(
+                status.HTTP_503_SERVICE_UNAVAILABLE, "Weather service unavailable"
+            ) from None
 
     @app.get("/v1/offices", response_model=list[OfficeOut], tags=["offices"])
     def list_offices() -> list[OfficeOut]:
-        return [OfficeOut(**asdict(o)) for o in service.offices()]
+        return [asdict(o) for o in service.offices()]
 
     return app
