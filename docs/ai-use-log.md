@@ -70,7 +70,7 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 
 ## Member: nhat_dm
 
-### Session: Lab 4 Service Bridge & Data Models
+### Session 1: Lab 4 Service Bridge & Data Models
 - **Date**: 2026-11-06
 - **Tool**: Antigravity (Gemini 3.8 Flash Medium)
 - **Prompt**: Implement models.py, AssistantService.respond(), and AssistantService.offices() according to docs/team-plan-lab04.md and issue #14.
@@ -79,6 +79,20 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   1. Enforced thousands separators on fee responses for API compatibility (`9,450,000 VND.`).
   2. Isolated CLI commands (`save`, `history`, `stats`) from HTTP execution to prevent unauthorized filesystem access or internal state leaks.
   3. Ensured `handle()` and all Week 3 tests remain completely untouched and green.
+
+### Session 2: Lab 5 Team Persistence Tests
+- **Date**: 2026-11-13
+- **Tool**: Antigravity (Gemini 3.8 Flash Medium)
+- **Prompt**: Implement tests/test_persistence.py covering restart persistence, 404 on unrecorded request_id, duplicate request_id handling, session hashing, raw session privacy, and idempotent migration execution.
+- **Kept**: Contract for Repository and FastAPI application endpoints; tested against temporary SQLite databases using tmp_path.
+- **Changed**:
+  1. Verified that feedback created in one app instance persists in SQLite across restart to a new app instance.
+  2. Verified that submitting feedback for unknown request_id returns 404 and writes zero rows to feedback table.
+  3. Tested duplicate feedback submissions for the same request_id, preserving multiple entries with distinct auto-incremented IDs.
+  4. Tested session hashing determinism and salt-dependence (multiple interactions within same session create 1 ChatSession row).
+  5. Verified that raw session IDs and message text are never stored in the database.
+  6. Verified that scripts/migrate.py runs multiple times safely without errors.
+- **Verification**: All 316 tests green in pytest; Ruff check clean.
 
 ## Member: nhat_npm
 

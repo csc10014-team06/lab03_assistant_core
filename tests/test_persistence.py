@@ -7,6 +7,8 @@ Task: Lab 5 Persistence tests (Issue #34, tutorial §E.6)
 from __future__ import annotations
 
 import sqlite3
+import subprocess
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
@@ -177,6 +179,44 @@ def test_raw_session_id_and_message_text_not_stored_in_db(
         # Neither the raw session string nor the message text should appear anywhere in the database
         assert not any(raw_session in text for text in all_text_values)
         assert not any(raw_message in text for text in all_text_values)
+    finally:
+        con.close()
+
+
+def test_migration_is_idempotent_when_run_twice(tmp_path: Path):
+    """Running scripts/migrate.py twice on the same DB file succeeds safely without errors."""
+    db_file = tmp_path / "migrated.db"
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "migrate.py"
+    assert script_path.exists()
+
+    # First migration run: creates tables and applies all migration files
+    run1 = subprocess.run(
+        [sys.executable, str(script_path), str(db_file)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert run1.returncode == 0
+    assert "apply" in run1.stdout
+
+    # Second migration run: should detect existing schema and skip already applied scripts
+    run2 = subprocess.run(
+        [sys.executable, str(script_path), str(db_file)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert run2.returncode == 0
+    assert "skip" in run2.stdout
+
+    # Check database integrity: verify essential tables exist
+    con = sqlite3.connect(db_file)
+    try:
+        tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+        assert "schema_version" in tables
+        assert "chat_session" in tables
+        assert "interaction" in tables
+        assert "feedback" in tables
     finally:
         con.close()
 
