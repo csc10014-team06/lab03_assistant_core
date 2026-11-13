@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import sqlite3
 
 import httpx
 import pytest
@@ -32,7 +33,10 @@ def weather_with(handler) -> WeatherClient:
 
 @pytest.fixture
 def settings():
-    return Settings()
+    return Settings(
+        db_url="sqlite://",
+        hash_salt="lab05-test-salt",
+    )
 
 
 @pytest.fixture
@@ -157,3 +161,36 @@ def test_offices_contains_library(client):
     assert library is not None
     assert library["room"] == "B.201"
     assert "Mon-Sat" in library["hours"]
+
+def test_chat_records_interaction(tmp_path, service):
+    db_path = tmp_path / "chat.db"
+    settings = dataclasses.replace(
+        Settings(),
+        db_url=f"sqlite:///{db_path}",
+        hash_salt="lab05-test-salt",
+    )
+
+    client = TestClient(create_app(settings, service))
+
+    response = client.post(
+        "/v1/chat",
+        json={"message": "hi", "session_id": "student-session-123"},
+    )
+
+    assert response.status_code == 200
+
+    with sqlite3.connect(db_path) as con:
+        rows = con.execute(
+            "SELECT request_id, session_id, intent, latency_ms "
+            "FROM interaction"
+        ).fetchall()
+
+    assert len(rows) == 1
+
+    request_id, session_hash, intent, latency_ms = rows[0]
+
+    assert request_id == response.json()["request_id"]
+    assert session_hash != "student-session-123"
+    assert len(session_hash) == 16
+    assert intent == "greeting"
+    assert latency_ms >= 0
