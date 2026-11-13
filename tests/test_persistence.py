@@ -6,6 +6,7 @@ Task: Lab 5 Persistence tests (Issue #34, tutorial §E.6)
 
 from __future__ import annotations
 
+import sqlite3
 from collections.abc import Callable
 from pathlib import Path
 
@@ -13,7 +14,7 @@ import pytest
 from sqlmodel import Session, select
 from starlette.testclient import TestClient
 
-from assistant_api.db import Feedback, Repository, init_db, make_engine
+from assistant_api.db import ChatSession, Feedback, Interaction, Repository, hash_session, init_db, make_engine
 from assistant_api.main import create_app
 from assistant_core.config import Settings
 from assistant_core.data_loader import load_handbook, load_offices
@@ -106,6 +107,78 @@ def test_feedback_survives_restart(app_factory: Callable[[], TestClient], admin_
     assert items[0]["request_id"] == req_id
     assert items[0]["rating"] == 1
     assert items[0]["comment"] == "very helpful answer"
+
+
+def test_session_hashing_stability_and_salt_dependence(
+    app_factory: Callable[[], TestClient], db_path: Path, salt: str
+):
+    """Session IDs are hashed deterministically with salt; same session maps to one row."""
+    # 1. Direct unit verification of the hash_session function
+    h1 = hash_session("student_session_1", salt)
+    h2 = hash_session("student_session_1", salt)
+    h_diff_sess = hash_session("student_session_2", salt)
+    h_diff_salt = hash_session("student_session_1", "different-salt-999")
+
+    assert len(h1) == 16
+    assert h1 == h2  # Stable & deterministic
+    assert h1 != h_diff_sess  # Distinct for different sessions
+    assert h1 != h_diff_salt  # Changes when salt changes
+
+    # 2. Database level: 3 chats in same session should produce only 1 ChatSession row
+    client = app_factory()
+    for msg in ("hi", "where is the library?", "fees for 10 credits"):
+        r = client.post("/v1/chat", json={"message": msg, "session_id": "student_session_1"})
+        assert r.status_code == 200
+
+    # 1 chat with a second session
+    r2 = client.post("/v1/chat", json={"message": "hi", "session_id": "student_session_2"})
+    assert r2.status_code == 200
+
+    engine = make_engine(f"sqlite:///{db_path}")
+    with Session(engine) as session:
+        sessions = session.exec(select(ChatSession)).all()
+        interactions = session.exec(select(Interaction)).all()
+
+        # Exactly 2 unique chat sessions recorded
+        assert len(sessions) == 2
+        assert {s.id for s in sessions} == {h1, h_diff_sess}
+
+        # 4 total interactions, 3 pointing to session 1, 1 pointing to session 2
+        assert len(interactions) == 4
+        s1_interactions = [i for i in interactions if i.session_id == h1]
+        s2_interactions = [i for i in interactions if i.session_id == h_diff_sess]
+        assert len(s1_interactions) == 3
+        assert len(s2_interactions) == 1
+
+
+def test_raw_session_id_and_message_text_not_stored_in_db(
+    app_factory: Callable[[], TestClient], db_path: Path
+):
+    """Privacy requirement: raw session IDs and message text are never persisted to SQLite."""
+    raw_session = "my_top_secret_raw_session_string_xyz"
+    raw_message = "confidential_personal_inquiry_for_credits"
+
+    client = app_factory()
+    resp = client.post("/v1/chat", json={"message": raw_message, "session_id": raw_session})
+    assert resp.status_code == 200
+
+    # Scan the raw SQLite database content across all tables and columns
+    con = sqlite3.connect(db_path)
+    try:
+        tables = [r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+        all_text_values: list[str] = []
+        for table in tables:
+            rows = con.execute(f"SELECT * FROM {table}").fetchall()  # noqa: S608 — test inspection
+            for row in rows:
+                for val in row:
+                    if isinstance(val, str):
+                        all_text_values.append(val)
+
+        # Neither the raw session string nor the message text should appear anywhere in the database
+        assert not any(raw_session in text for text in all_text_values)
+        assert not any(raw_message in text for text in all_text_values)
+    finally:
+        con.close()
 
 
 def test_feedback_unknown_request_id_returns_404_and_writes_nothing(
