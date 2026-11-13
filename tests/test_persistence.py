@@ -65,3 +65,43 @@ def test_fixture_app_factory_creates_client(app_factory: Callable[[], TestClient
     client = app_factory()
     r = client.get("/health")
     assert r.status_code == 200
+
+
+def test_feedback_survives_restart(app_factory: Callable[[], TestClient], admin_key: str):
+    """Grading requirement: feedback saved in SQLite survives restarting the app.
+
+    Workflow:
+    1. Instance A handles a chat and records an interaction in SQLite.
+    2. Instance A accepts feedback for that interaction.
+    3. Simulate shutdown and restart: Instance B boots against the identical SQLite file.
+    4. Query feedback via admin endpoint on Instance B: the feedback record is fully preserved.
+    """
+    client_a = app_factory()
+
+    # 1. Chat to create an interaction
+    chat_resp = client_a.post("/v1/chat", json={"message": "where is the library?", "session_id": "sess-restart-1"})
+    assert chat_resp.status_code == 200
+    req_id = chat_resp.json()["request_id"]
+    assert req_id
+
+    # 2. Submit feedback
+    fb_resp = client_a.post(
+        "/v1/feedback",
+        json={"request_id": req_id, "rating": 1, "comment": "very helpful answer"},
+    )
+    assert fb_resp.status_code == 201
+    feedback_id = fb_resp.json()["id"]
+
+    # 3. Simulate process termination and restart with a completely new app/client instance
+    del client_a
+    client_b = app_factory()
+
+    # 4. Verify feedback persists across process boundary
+    list_resp = client_b.get("/v1/feedback", headers={"X-API-Key": admin_key})
+    assert list_resp.status_code == 200
+    items = list_resp.json()
+    assert len(items) == 1
+    assert items[0]["id"] == feedback_id
+    assert items[0]["request_id"] == req_id
+    assert items[0]["rating"] == 1
+    assert items[0]["comment"] == "very helpful answer"
