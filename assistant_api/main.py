@@ -9,12 +9,12 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import asdict
-from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from assistant_api.db import Repository, init_db, make_engine
 from assistant_api.ratelimit import RateLimiter
 from assistant_api.schemas import (
     ChatRequest,
@@ -33,7 +33,10 @@ from assistant_core.service import AssistantService
 
 
 def create_app(
-    settings: Settings | None = None, service: AssistantService | None = None, weather: WeatherClient | None = None
+    settings: Settings | None = None,
+    service: AssistantService | None = None,
+    weather: WeatherClient | None = None,
+    repo: Repository | None = None,
 ) -> FastAPI:
     settings = settings or load_settings()
     service = service or build_service(settings)
@@ -41,7 +44,10 @@ def create_app(
         settings.weather_url, settings.campus_lat, settings.campus_lon, timeout_s=settings.weather_timeout_s
     )
     limiter = RateLimiter(settings.rate_limit_per_min)  # noqa: F841 — used in BONUS task
-    feedback_store: list[FeedbackOut] = []
+    if repo is None:
+        engine = make_engine(settings.db_url)
+        init_db(engine)
+        repo = Repository(engine, settings.require_hash_salt())
 
     app = FastAPI(
         title="Study Assistant API", version="1.0.0", description="Backend of the CSC10014 Smart Virtual Assistant."
@@ -92,16 +98,23 @@ def create_app(
             request_id=uuid.uuid4().hex[:12],
         )
 
-    @app.post("/v1/feedback", response_model=FeedbackOut, status_code=201, tags=["feedback"])
+    @app.post(
+        "/v1/feedback",
+        response_model=FeedbackOut,
+        status_code=201,
+        tags=["feedback"],
+        responses={404: {"model": ErrorResponse}},
+    )
     def add_feedback(fb: FeedbackIn) -> FeedbackOut:
-        item = FeedbackOut(**fb.model_dump(), id=len(feedback_store) + 1, created_at=datetime.now(timezone.utc))
-        feedback_store.append(item)
-        return item
+        saved = repo.add_feedback(fb.request_id, fb.rating, fb.comment)
+        if saved is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Unknown request id")
+        return FeedbackOut.model_validate(saved, from_attributes=True)
 
     @app.get("/v1/feedback", response_model=list[FeedbackOut], tags=["feedback"], dependencies=[Depends(require_admin)])
-    def list_feedback() -> list[FeedbackOut]:
+    def list_feedback(limit: int = 100) -> list[FeedbackOut]:
         # The API-key check is already done by `require_admin` above.
-        return feedback_store
+        return [FeedbackOut.model_validate(f, from_attributes=True) for f in repo.list_feedback(limit)]
 
     @app.get("/v1/weather", response_model=Weather, tags=["external"], responses={503: {"model": ErrorResponse}})
     def campus_weather() -> Weather:
