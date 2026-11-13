@@ -14,17 +14,17 @@ Individual submission. Change **only this folder** in your PR. Rules: `docs/team
 `python check.py`:
 
 ```
-Score: __/15
+Score: 15/15
 ```
 
 `pytest -q test_school_repo.py`:
 
 ```
-__ passed
+5 passed
 ```
 
 ## Reflection (optional, 2–3 lines)
 What was hardest: JOIN, GROUP BY, or placeholders?
 
 ## AI use
-Logged in `docs/ai-use-log.md`: yes / no / not used
+Logged in `docs/ai-use-log.md`: yes
