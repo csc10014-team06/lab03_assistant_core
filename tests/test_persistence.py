@@ -10,9 +10,10 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+from sqlmodel import Session, select
 from starlette.testclient import TestClient
 
-from assistant_api.db import Repository, init_db, make_engine
+from assistant_api.db import Feedback, Repository, init_db, make_engine
 from assistant_api.main import create_app
 from assistant_core.config import Settings
 from assistant_core.data_loader import load_handbook, load_offices
@@ -105,3 +106,24 @@ def test_feedback_survives_restart(app_factory: Callable[[], TestClient], admin_
     assert items[0]["request_id"] == req_id
     assert items[0]["rating"] == 1
     assert items[0]["comment"] == "very helpful answer"
+
+
+def test_feedback_unknown_request_id_returns_404_and_writes_nothing(
+    app_factory: Callable[[], TestClient], db_path: Path
+):
+    """Submitting feedback for an unrecorded request_id returns 404 and writes zero rows."""
+    client = app_factory()
+
+    # Attempt feedback on a non-existent request id
+    resp = client.post(
+        "/v1/feedback",
+        json={"request_id": "ghost-request-id", "rating": -1, "comment": "should not exist"},
+    )
+    assert resp.status_code == 404
+    assert resp.json()["error"]["code"] == "unknown_request_id"
+
+    # Verify directly against SQLite that no phantom feedback row was written
+    engine = make_engine(f"sqlite:///{db_path}")
+    with Session(engine) as session:
+        feedbacks = session.exec(select(Feedback)).all()
+        assert len(feedbacks) == 0
