@@ -82,3 +82,13 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Prompt**: Implement issue #17 (T2 `POST /v1/feedback`, T3 `GET /v1/feedback` admin) following `docs/team-plan-lab04.md`.
 - **Kept**: The starter's 3-line T2 body (in-memory `feedback_store`, `id = len + 1`, UTC `created_at`) and the 1-line T3 body relying on the existing `require_admin` dependency.
 - **Changed**: Added the missing `datetime` import, removed the now-unused `noqa`, pasted the starter's `test_feedback_roundtrip` and `test_feedback_rating_out_of_range` unchanged into `tests/test_api.py`, filled the feedback rows of `worksheets/api_contract.md`, and verified 201 / 422 / 401 / 200 with `api-tests/curl_tests.sh`.
+
+## Member: dieu_sp
+
+### Session: Lab 5 practice (Part A) and feedback persistence R1/R2 (Part B)
+- **Date**: 2026-11-13
+- **Tool**: Claude Code (Claude Opus 5.5)
+- **Prompt**: Complete issue #32 following `docs/team-plan-lab05.md`: individual practice in `submissions/lab05/dieu_sp/`, then R1 `add_feedback` / R2 `list_feedback` and replace the in-memory `feedback_store`.
+- **Kept**: The starter's R1 body (add, commit, refresh, return) and its `create_app(..., repo=None)` wiring; the starter's `test_feedback_roundtrip` shape.
+- **Changed**: R2 sorts by `created_at DESC, id DESC` so rows saved in the same clock tick keep a stable order; the default repository uses our `db_url` and `require_hash_salt()` settings; API tests use an in-memory database; added tests for the 404 and newest-first order; updated the feedback rows of `worksheets/api_contract.md`.
+- **Verification**: `python check.py` → `Score: 15/15`, `pytest -q test_school_repo.py` → `5 passed`; full `pytest` → 305 passed, `ruff check .` clean; a manual run against a temp SQLite file showed 201 / 404 / 401 and the row still listed after re-creating the app.
