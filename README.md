@@ -81,6 +81,8 @@ Available environment variables:
 | `ASSISTANT_WEATHER_TIMEOUT_S` | `3` | Seconds to wait for the weather service |
 | `ASSISTANT_CAMPUS_LAT` / `ASSISTANT_CAMPUS_LON` | `10.7626` / `106.6822` | Campus coordinates for the weather request |
 | `ASSISTANT_RATE_LIMIT_PER_MIN` | `30` | Max `POST /v1/chat` requests per client per minute |
+| `ASSISTANT_DB_URL` | `sqlite:///assistant.db` | Database URL (SQLite file, relative to the working directory) |
+| `ASSISTANT_HASH_SALT` | `None` | Secret salt for hashing session ids (min 8 chars); required when the database is used; never logged or in `repr()` |
 
 ---
 

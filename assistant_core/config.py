@@ -16,6 +16,7 @@ from pathlib import Path
 PACKAGE_DIR = Path(__file__).resolve().parent
 
 ENV_PREFIX = "ASSISTANT_"
+MIN_SALT_LENGTH = 8
 _TRUE_VALUES = {"1", "true", "yes", "on"}
 _FALSE_VALUES = {"0", "false", "no", "off", ""}
 
@@ -43,6 +44,9 @@ class Settings:
     campus_lat: float = 10.7626  # University of Science, HCMC (Nguyen Van Cu campus)
     campus_lon: float = 106.6822
     rate_limit_per_min: int = 30  # max POST /v1/chat requests per client per minute
+    # --- Lab 5: database -------------------------------------------------
+    db_url: str = "sqlite:///assistant.db"  # relative paths are resolved from the working directory
+    hash_salt: str | None = field(default=None, repr=False)  # secret; hashes session ids (see require_hash_salt)
 
     def __post_init__(self) -> None:
         if self.credit_rate <= 0:
@@ -61,6 +65,20 @@ class Settings:
             raise ConfigError(f"campus_lat must be between -90 and 90, got {self.campus_lat}")
         if not -180 <= self.campus_lon <= 180:
             raise ConfigError(f"campus_lon must be between -180 and 180, got {self.campus_lon}")
+        if not self.db_url.strip() or "://" not in self.db_url:
+            raise ConfigError("db_url must be a database URL such as 'sqlite:///assistant.db'")
+        if self.hash_salt is not None and len(self.hash_salt) < MIN_SALT_LENGTH:
+            raise ConfigError(f"hash_salt must be at least {MIN_SALT_LENGTH} characters long")
+
+    def require_hash_salt(self) -> str:
+        """Return the salt used to hash session ids, or fail loudly if it was never configured.
+
+        Call this when the database layer starts. Hashing without a salt would let anyone who sees the
+        database reverse the hashes by trying likely session ids, so there is deliberately no default.
+        """
+        if self.hash_salt is None:
+            raise ConfigError("ASSISTANT_HASH_SALT is not set; put a long random value in .env (see .env.example)")
+        return self.hash_salt
 
     @property
     def offices_path(self) -> Path:
@@ -136,5 +154,9 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         overrides["campus_lon"] = _parse_float("ASSISTANT_CAMPUS_LON", raw)
     if (raw := get("RATE_LIMIT_PER_MIN")) is not None:
         overrides["rate_limit_per_min"] = _parse_int("ASSISTANT_RATE_LIMIT_PER_MIN", raw)
+    if raw := get("DB_URL"):
+        overrides["db_url"] = raw
+    if raw := get("HASH_SALT"):
+        overrides["hash_salt"] = raw
 
     return Settings(**overrides)  # type: ignore[arg-type]
