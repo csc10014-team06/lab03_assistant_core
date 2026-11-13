@@ -23,7 +23,16 @@ Score: 15/15
 ```
 
 ## Reflection (optional, 2–3 lines)
-What was hardest: JOIN, GROUP BY, or placeholders?
+JOIN and GROUP BY were the most challenging parts for me, especially understanding how to group rows and calculate aggregate values.
+I learned how to use SQL placeholders (`?`) in Python to prevent SQL injection.
+Running `check.py` and pytest helped me identify mistakes and verify my solutions.
 
 ## AI use
-Logged in `docs/ai-use-log.md`: yes / no / not used
+
+- **Tool:** ChatGPT (OpenAI)
+- **Date:** 2026-11-13
+- **Purpose:** Used AI as a learning assistant for Lab 05 SQL and Python database exercises.
+- **How I used AI:** Asked for step-by-step explanations of SQL queries Q1–Q15, including `JOIN`, `GROUP BY`, `ORDER BY`, and aggregate functions. Used AI guidance to understand parameterized SQL queries, SQLite connections, and database operations in Python for D1–D3. Also received guidance on writing the H2 query to identify the busiest chatbot hour.
+- **What I completed:** Wrote the SQL queries and Python database functions, tested the implementations, and corrected errors based on test results.
+- **Verification:** `python check.py` returned **15/15**, and `python -m pytest -q test_school_repo.py` returned **5 passed**.
+- **AI usage log:** Detailed prompts, retained work, and modifications are documented under **Member: vy_th — Session 3: Lab 5 Individual SQL and Python Practice** in `docs/ai-use-log.md`.
