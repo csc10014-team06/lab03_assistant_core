@@ -1,30 +1,33 @@
-# Lab 5 — nhat_npm
+# Lab 5 - nhat_npm
 
-Individual submission. Change **only this folder** in your PR. Rules: `docs/team-plan-lab05.md`.
+Individual submission. This branch changes only this folder, as required by `docs/team-plan-lab05.md`.
 
-## Files (copy the practice files here, see `../README.md`)
-- [ ] `my_answers.sql` — Q1–Q10 (must), Q11–Q15 (should)
-- [ ] `school_repo.py` — D1–D3 (must), including `test_d1_no_sql_injection`
-- [ ] `h2.md` — H2 (should): one more useful question about the assistant data, its query, and the pasted result
-- [ ] `make_school_db.py`, `check.py`, `test_school_repo.py` — copied unchanged
-- [ ] No `school.db` committed
+## Files
+- [x] `my_answers.sql` - Q1-Q15
+- [x] `school_repo.py` - D1-D3, with parameterized SQL
+- [x] `h2.md` - an additional assistant-data question, query, and result
+- [x] `make_school_db.py`, `check.py`, `test_school_repo.py` copied unchanged
+- [x] `school.sql` and `expected.json` copied as checker/database inputs
+- [x] `school.db` is generated locally and ignored; it is not submitted
 
-## Results (paste the real output)
+## Results
 
 `python check.py`:
 
 ```
-Score: __/15
+Score: 15/15
 ```
 
 `pytest -q test_school_repo.py`:
 
 ```
-__ passed
+5 passed
 ```
 
-## Reflection (optional, 2–3 lines)
-What was hardest: JOIN, GROUP BY, or placeholders?
+## Reflection
+
+The JOIN in the transcript query was the hardest part because it has to connect each enrollment to the matching course. Bound placeholders keep input values separate from SQL, and GROUP BY lets SQLite count each program or course cleanly.
 
 ## AI use
-Logged in `docs/ai-use-log.md`: yes / no / not used
+
+Yes. Usage is recorded in `docs/ai-use-log.md` in the separate team contribution branch.
