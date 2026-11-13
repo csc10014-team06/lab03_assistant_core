@@ -82,3 +82,13 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Prompt**: Implement issue #17 (T2 `POST /v1/feedback`, T3 `GET /v1/feedback` admin) following `docs/team-plan-lab04.md`.
 - **Kept**: The starter's 3-line T2 body (in-memory `feedback_store`, `id = len + 1`, UTC `created_at`) and the 1-line T3 body relying on the existing `require_admin` dependency.
 - **Changed**: Added the missing `datetime` import, removed the now-unused `noqa`, pasted the starter's `test_feedback_roundtrip` and `test_feedback_rating_out_of_range` unchanged into `tests/test_api.py`, filled the feedback rows of `worksheets/api_contract.md`, and verified 201 / 422 / 401 / 200 with `api-tests/curl_tests.sh`.
+
+## Member: nhat_npm
+
+### Session: Lab 5 individual practice and privacy review
+- **Date:** 2026-11-13
+- **Tool:** OpenAI Codex
+- **Prompt:** "Pull latest main, copy the Lab 5 materials, and complete Nhat_NPM's assigned tasks."
+- **Kept:** The supplied SQL question markers, checker, repository tests, and Lab 5 database contracts.
+- **Changed:** Implemented Q1-Q15 and D1-D3 in my individual folder, added H2 with a result from synthetic data, and completed the data-model/privacy review using the starter schema and tutorial.
+- **Verification:** `python check.py` reported `Score: 15/15`; `pytest -q test_school_repo.py` reported `5 passed`. The H2 dataset has 300 synthetic interactions; a temporary runtime shim supplied the still-pending R1 feedback insert so the seed script could finish. No team implementation files were changed for the shim.
