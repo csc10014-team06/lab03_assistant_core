@@ -142,6 +142,23 @@ Or import `api-tests/study-assistant.postman_collection.json` into Postman / Bru
 
 ---
 
+## Database
+
+The assistant uses SQLite with `SQLModel` to persist metadata for chat sessions, interactions, and user feedback without storing raw personal messages.
+
+1. **Apply schema migrations** (safe to run multiple times):
+```bash
+python scripts/migrate.py assistant.db
+```
+
+2. **Seed synthetic data** for local testing or SQL analysis:
+```bash
+python scripts/seed.py assistant.db 300
+```
+
+> **Note:** Never commit `*.db` files or `.env` (which holds `ASSISTANT_HASH_SALT`) to Git.
+
+---
 ## Testing & Code Quality
 
 The test suite includes characterization tests verifying backwards compatibility against the legacy monolith, as well as comprehensive unit tests for each module.
