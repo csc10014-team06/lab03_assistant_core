@@ -52,6 +52,21 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   4. Fixed import formatting using Ruff.
   5. Separated the chat endpoint, rate limiting, and API tests into three Git commits.
 - **Verification**: All three targeted API tests passed, and Ruff reported `All checks passed!`.
+### Session 3: Lab 5 Individual SQL and Python Practice
+- **Date**: 2026-11-13
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Guide me step by step through Lab 5 SQL Q1–Q15, Python D1–D3, and H2 without giving complete solutions.
+- **Kept**: The original practice starter files, SQL question markers, and provided tests.
+- **Changed**: Completed SQL Q1–Q15, implemented D1–D3 using parameterized SQL, and wrote an H2 query about the busiest chatbot hour.
+- **Verification**: `python check.py` — 15/15; `pytest -q test_school_repo.py` — 5 passed.
+
+### Session 4: Lab 5 Chat Interaction Persistence
+- **Date**: 2026-11-13
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Implement chat interaction persistence following docs/team-plan-lab05.md and help debug the API tests.
+- **Kept**: The existing Lab 4 chat endpoint, rate limiting, and the provided Repository.record_interaction() implementation.
+- **Changed**: Added database initialization, response latency measurement, and interaction metadata recording without storing raw messages. Added a persistence test using temporary SQLite.
+- **Verification**: Full pytest — 304 passed; Ruff — all checks passed.
 
 ## Member: nhat_dm
 
