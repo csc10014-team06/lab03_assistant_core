@@ -127,3 +127,41 @@ def test_feedback_unknown_request_id_returns_404_and_writes_nothing(
     with Session(engine) as session:
         feedbacks = session.exec(select(Feedback)).all()
         assert len(feedbacks) == 0
+
+
+def test_feedback_multiple_submissions_allowed_for_same_request_id(
+    app_factory: Callable[[], TestClient], admin_key: str
+):
+    """Documenting agreed behavior with dieu_sp for duplicate feedback requests.
+
+    In the current schema (Feedback.request_id indexed with non-unique foreign key),
+    submitting multiple feedback entries for the same interaction is permitted
+    (e.g., student updates their review or adds further comments).
+    Each submission creates an independent feedback record with a distinct auto-incremented id.
+    """
+    client = app_factory()
+
+    # Create interaction
+    chat_resp = client.post("/v1/chat", json={"message": "fees for 10 credits", "session_id": "sess-dup-1"})
+    assert chat_resp.status_code == 200
+    req_id = chat_resp.json()["request_id"]
+
+    # Submit first feedback
+    fb1 = client.post("/v1/feedback", json={"request_id": req_id, "rating": 0, "comment": "initial neutral reaction"})
+    assert fb1.status_code == 201
+    id1 = fb1.json()["id"]
+
+    # Submit second feedback on the same request_id
+    fb2 = client.post("/v1/feedback", json={"request_id": req_id, "rating": 1, "comment": "updated positive review"})
+    assert fb2.status_code == 201
+    id2 = fb2.json()["id"]
+
+    assert id1 != id2
+
+    # Verify both records are retrieved via admin endpoint in newest-first order
+    list_resp = client.get("/v1/feedback", headers={"X-API-Key": admin_key})
+    assert list_resp.status_code == 200
+    items = list_resp.json()
+    assert len(items) == 2
+    assert [item["id"] for item in items] == [id2, id1]
+    assert [item["comment"] for item in items] == ["updated positive review", "initial neutral reaction"]
