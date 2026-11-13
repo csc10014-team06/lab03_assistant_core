@@ -110,6 +110,12 @@ def test_feedback_list_newest_first(client, repo):
     assert [f["request_id"] for f in listed] == ["r3", "r2", "r1"]
 
 
+@pytest.mark.parametrize("limit", [0, -1, 101])
+def test_feedback_list_limit_out_of_range(client, limit):
+    r = client.get("/v1/feedback", params={"limit": limit}, headers={"X-API-Key": "secret-admin"})
+    assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_request"
+
+
 def test_feedback_rating_out_of_range(client):
     assert client.post("/v1/feedback", json={"request_id": "x", "rating": 5}).status_code == 422
 

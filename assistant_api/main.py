@@ -10,7 +10,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import asdict
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -112,7 +112,7 @@ def create_app(
         return FeedbackOut.model_validate(saved, from_attributes=True)
 
     @app.get("/v1/feedback", response_model=list[FeedbackOut], tags=["feedback"], dependencies=[Depends(require_admin)])
-    def list_feedback(limit: int = 100) -> list[FeedbackOut]:
+    def list_feedback(limit: int = Query(100, ge=1, le=100)) -> list[FeedbackOut]:
         # The API-key check is already done by `require_admin` above.
         return [FeedbackOut.model_validate(f, from_attributes=True) for f in repo.list_feedback(limit)]
 
