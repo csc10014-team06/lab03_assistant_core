@@ -80,6 +80,19 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   2. Isolated CLI commands (`save`, `history`, `stats`) from HTTP execution to prevent unauthorized filesystem access or internal state leaks.
   3. Ensured `handle()` and all Week 3 tests remain completely untouched and green.
 
+### Session 2: Lab 5 Team Persistence Tests
+- **Date**: 2026-11-13
+- **Tool**: Antigravity (Gemini 3.8 Flash Medium)
+- **Prompt**: Implement tests/test_persistence.py covering restart persistence, 404 on unrecorded request_id, duplicate request_id handling, session hashing, raw session privacy, and idempotent migration execution.
+- **Kept**: Contract for Repository and FastAPI application endpoints; tested against temporary SQLite databases using tmp_path.
+- **Changed**:
+  1. Verified that feedback created in one app instance persists in SQLite across restart to a new app instance.
+  2. Verified that submitting feedback for unknown request_id returns 404 and writes zero rows to feedback table.
+  3. Tested duplicate feedback submissions for the same request_id, preserving multiple entries with distinct auto-incremented IDs.
+  4. Tested session hashing determinism and salt-dependence (multiple interactions within same session create 1 ChatSession row).
+  5. Verified that raw session IDs and message text are never stored in the database.
+  6. Verified that scripts/migrate.py runs multiple times safely without errors.
+- **Verification**: All 316 tests green in pytest; Ruff check clean.
 ### Session 2: Lab 5 Individual SQL & Python Practice
 - **Date**: 2026-11-13
 - **Tool**: Antigravity (Gemini 3.8 Flash Medium)
@@ -104,6 +117,16 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Prompt**: Implement issue #17 (T2 `POST /v1/feedback`, T3 `GET /v1/feedback` admin) following `docs/team-plan-lab04.md`.
 - **Kept**: The starter's 3-line T2 body (in-memory `feedback_store`, `id = len + 1`, UTC `created_at`) and the 1-line T3 body relying on the existing `require_admin` dependency.
 - **Changed**: Added the missing `datetime` import, removed the now-unused `noqa`, pasted the starter's `test_feedback_roundtrip` and `test_feedback_rating_out_of_range` unchanged into `tests/test_api.py`, filled the feedback rows of `worksheets/api_contract.md`, and verified 201 / 422 / 401 / 200 with `api-tests/curl_tests.sh`.
+
+## Member: dieu_sp
+
+### Session: Lab 5 practice (Part A) and feedback persistence R1/R2 (Part B)
+- **Date**: 2026-11-13
+- **Tool**: Claude Code (Claude Opus 5.5)
+- **Prompt**: Complete issue #32 following `docs/team-plan-lab05.md`: individual practice in `submissions/lab05/dieu_sp/`, then R1 `add_feedback` / R2 `list_feedback` and replace the in-memory `feedback_store`.
+- **Kept**: The starter's R1 body (add, commit, refresh, return) and its `create_app(..., repo=None)` wiring; the starter's `test_feedback_roundtrip` shape.
+- **Changed**: R2 sorts by `created_at DESC, id DESC` so rows saved in the same clock tick keep a stable order; the default repository uses our `db_url` and `require_hash_salt()` settings; API tests use an in-memory database; added tests for the 404 and newest-first order; updated the feedback rows of `worksheets/api_contract.md`.
+- **Verification**: `python check.py` → `Score: 15/15`, `pytest -q test_school_repo.py` → `5 passed`; full `pytest` → 305 passed, `ruff check .` clean; a manual run against a temp SQLite file showed 201 / 404 / 401 and the row still listed after re-creating the app.
 
 ## Member: long_th
 
