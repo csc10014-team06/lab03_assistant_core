@@ -15,5 +15,5 @@ hr "feedback bad rating (422)";        curl -s -w "  [%{http_code}]\n" -X POST "
 hr "list feedback no key (401)";       curl -s -w "  [%{http_code}]\n" "$BASE/v1/feedback"
 hr "list feedback with key (200)";     curl -s -w "  [%{http_code}]\n" -H "X-API-Key: $ADMIN" "$BASE/v1/feedback"
 hr "weather (200, or 503 if down)";    curl -s -w "  [%{http_code}]\n" -m 10 "$BASE/v1/weather"
+hr "offices (expect 200, sorted)";     curl -s -w "  [%{http_code}]\n" "$BASE/v1/offices"
 hr "unknown route (404)";              curl -s -w "  [%{http_code}]\n" "$BASE/v1/nope"
-

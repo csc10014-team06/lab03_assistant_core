@@ -20,46 +20,57 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Usage:** Scaffolded `assistant_api` package structure, adjusted imports in `main.py` to match `assistant_core` modules (`cli`, `config`, `models`, `service`), configured `api-tests/curl_tests.sh` and Postman collection, copied worksheets (`api_contract.md`, `external_api_failure.md`), configured API fixtures and health check in `tests/test_api.py`, and added "Run the API" documentation to `README.md`.
 - **Human contribution:** Verified endpoint routing structure against team contract; tested `/health` and OpenAPI `/docs` specification; ensured backward compatibility with Lab 3 tests.
 
+### Session 4: Lab 5 Database Foundation & Individual SQL/Python Practice
+- **Date:** 2026-11-13
+- **Tool:** Gemini
+- **Usage:** Guided adaptation of Lab 5 database foundation files (`assistant_api/db.py`, `sql/migrations/`, `scripts/migrate.py`, `scripts/seed.py`) to the team's flat layout, drafted the `Database` setup section for `README.md`, and assisted with individual SQL queries (`Q1–Q15`, `H2`) and parameterized `sqlite3` repository functions (`D1–D3`).
+- **Human contribution:** Verified flat-layout imports and editable installation (`pip install -e .`); resolved Ruff `F841` warning in `list_feedback` while preserving `R1`/`R2` placeholders for teammates; tested idempotent migrations twice (`python scripts/migrate.py assistant.db`); verified individual practice locally via `python check.py` (`Score: 15/15`) and `pytest -q test_school_repo.py` (`5 passed`) while keeping `*.db` files untracked.
+
 ## Member: vy_th
-
+### Session 1: Lab 3 Data Loader Implementation and Testing
+- **Date**: 2026-10-26
 - **Tool**: ChatGPT
-- **Usage**: Reviewed CSV/JSON loading logic, validation, exception handling, pytest tests, and Ruff warnings.
-- **Human contribution**: Implemented and revised the loaders, checked suggestions, and ran tests locally.
-
-## Member: truyen_lp
-
-### Session 1: Planning and Architecture Review
-- **Date**: 2026-10-26
-- **Tool**: Antigravity (Gemini 3.8 Flash High)
-- **Prompt**: "Bạn hãy đọc qua docs/team-plan.md, mình là truyen_lp. Bạn hãy xem và lập plan thực hiện kế hoạch cho mình."
-- **Kept**: Detailed execution plan structuring offices.py lookup, handbook.py scoring, tie-breaking guarantees, dataclass contracts, and test plans.
-- **Changed**: Refined tokenization boundary punctuation stripping in `handbook.py` so trailing punctuation (e.g. `thesis?`) does not prevent keyword matching, while strictly preserving monolith tie-breaking logic.
-
-### Session 2: AI-Extension Feature (Exam Absence)
-- **Date**: 2026-10-26
-- **Tool**: Antigravity (Gemini 3.8 Flash High)
-- **Prompt**: "Write a Python function in handbook.py that extracts the exam absence rule and returns a direct answer with the deadline for submitting evidence to the Training Office."
-- **Kept**: Core intent of finding rule and providing deadline answer.
+- **Prompt**: "Help me implement and test the CSV/JSON data loader for the Lab 3 assistant_core refactoring project."
+- **Kept**: The implementation of `load_offices()` and `load_handbook()`, data models (`Office`, `Rule`), input validation, exception handling with `DataLoadError`, and unit tests in `tests/test_data_loader.py`.
 - **Changed**:
-  1. Replaced hardcoded text with dynamic regex extraction against `Rule.text` from the handbook dataset (extracting both office and deadline dynamically).
-  2. Replaced untyped signature returning string on error with `Rule | None` / `str | None` type hints and proper docstrings.
-  3. Replaced fragile `r.title` check with canonical ID `_EXAM_ABSENCE_RULE_ID` lookup and pure `best_rule` keyword fallback.
-- **Review documented in**: `worksheets/ai_extension_review.md`.
+  1. Added validation for required CSV headers and office records.
+  2. Validated handbook JSON structure and rule fields before constructing objects.
+  3. Added error handling for missing files, malformed data, and invalid field values.
+  4. Organized the implementation with type hints and frozen dataclasses.
+  5. Reviewed Ruff warnings and refined the code to follow project conventions.
+- **Verification**: Ran 9 data-loader unit tests successfully and checked Ruff for code quality.
 
-### Session 3: Peer Review Feedback & Hardening
-- **Date**: 2026-10-26
-- **Tool**: Antigravity (Gemini 3.8 Flash High)
-- **Prompt**: "Review PR feedback from dieu_sp and address all 5 points."
-- **Kept**: Feedback points from dieu_sp.
+### Session 2: Lab 4 Chat Endpoint and Rate Limiting
+- **Date**: 2026-11-07
+- **Tool**: ChatGPT
+- **Prompt**: "Guide me through implementing T1 POST /v1/chat and Part F rate limiting according to docs/team-plan-lab04.md."
+- **Kept**: The chat endpoint implementation using `AssistantService.respond(Message(...))`, UUID-based request IDs, per-client rate limiting with HTTP 429 responses, and three API tests covering tuition calculation, request validation, and rate limiting.
 - **Changed**:
-  1. Upgraded `find_office` in `offices.py` to use word-boundary matching `\b{key}\b` (addressing monolith line 78 substring bug).
-  2. Extracted both destination office and deadline dynamically via named groups in `_ABSENCE_PATTERN` to strictly uphold single source of truth.
-  3. Added module constant `_EXAM_ABSENCE_RULE_ID = "H26-7.2"`.
-  4. Added unit tests for substring false positive rejection and dynamic office extraction.
+  1. Used `service.respond()` instead of the starter's `service.handle()` to match the team's Lab 4 interface.
+  2. Integrated rate limiting into the existing `chat()` endpoint without modifying other members' endpoints.
+  3. Recreated the Python virtual environment after identifying that the shell was using Homebrew Python instead of the project's virtual environment.
+  4. Fixed import formatting using Ruff.
+  5. Separated the chat endpoint, rate limiting, and API tests into three Git commits.
+- **Verification**: All three targeted API tests passed, and Ruff reported `All checks passed!`.
+### Session 3: Lab 5 Individual SQL and Python Practice
+- **Date**: 2026-11-13
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Guide me step by step through Lab 5 SQL Q1–Q15, Python D1–D3, and H2 without giving complete solutions.
+- **Kept**: The original practice starter files, SQL question markers, and provided tests.
+- **Changed**: Completed SQL Q1–Q15, implemented D1–D3 using parameterized SQL, and wrote an H2 query about the busiest chatbot hour.
+- **Verification**: `python check.py` — 15/15; `pytest -q test_school_repo.py` — 5 passed.
+
+### Session 4: Lab 5 Chat Interaction Persistence
+- **Date**: 2026-11-13
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Implement chat interaction persistence following docs/team-plan-lab05.md and help debug the API tests.
+- **Kept**: The existing Lab 4 chat endpoint, rate limiting, and the provided Repository.record_interaction() implementation.
+- **Changed**: Added database initialization, response latency measurement, and interaction metadata recording without storing raw messages. Added a persistence test using temporary SQLite.
+- **Verification**: Full pytest — 304 passed; Ruff — all checks passed.
 
 ## Member: nhat_dm
 
-### Session: Lab 4 Service Bridge & Data Models
+### Session 1: Lab 4 Service Bridge & Data Models
 - **Date**: 2026-11-06
 - **Tool**: Antigravity (Gemini 3.8 Flash Medium)
 - **Prompt**: Implement models.py, AssistantService.respond(), and AssistantService.offices() according to docs/team-plan-lab04.md and issue #14.
@@ -68,6 +79,14 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   1. Enforced thousands separators on fee responses for API compatibility (`9,450,000 VND.`).
   2. Isolated CLI commands (`save`, `history`, `stats`) from HTTP execution to prevent unauthorized filesystem access or internal state leaks.
   3. Ensured `handle()` and all Week 3 tests remain completely untouched and green.
+
+### Session 2: Lab 5 Individual SQL & Python Practice
+- **Date**: 2026-11-13
+- **Tool**: Antigravity (Gemini 3.8 Flash Medium)
+- **Prompt**: Complete individual SQL practice Q1-Q15 on school.db, Python repository functions D1-D3 with parameterized queries, and extra question H2 with query and analysis.
+- **Kept**: Completed `my_answers.sql` covering queries Q1–Q15; `school_repo.py` implementing `students_in_program`, `add_student`, `average_grade`, and `transcript`; crafted `h2.md` analyzing at-risk failure proportions across courses.
+- **Verification**: Verified SQL answers via `python check.py` achieving `Score: 15/15`; verified `school_repo.py` via `pytest -q test_school_repo.py` (`5 passed`); verified that `school.db` remains untracked in Git; ensured code formatting adheres to team standards.
+
 ## Member: nhat_npm
 
 ### Session: Lab 4 Weather Endpoint (T4)
@@ -108,3 +127,25 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Prompt**: Help with `school_repo.py` (the `transcript` JOIN query, D3) and with running `pytest`.
 - **Kept**: The code it suggested for `school_repo.py`, in particular the `transcript` JOIN query (D3), which is identical to the code shown in its chat panel. It also explained that the `pytest` failure came from an older system Python and how to recreate the virtual environment with Python 3.10.
 - **Changed**: Used its suggestions and then tested them myself: `python check.py` gives 15/15 and `pytest -q test_school_repo.py` gives 5 passed. No other practice answers were taken from it.
+
+## Member: nhat_npm
+
+### Session: Lab 5 individual practice and privacy review
+- **Date:** 2026-11-13
+- **Tool:** OpenAI Codex
+- **Prompt:** "Pull latest main, copy the Lab 5 materials, and complete Nhat_NPM's assigned tasks."
+- **Kept:** The supplied SQL question markers, checker, repository tests, and Lab 5 database contracts.
+- **Changed:** Implemented Q1-Q15 and D1-D3 in my individual folder, added H2 with a result from synthetic data, and completed the data-model/privacy review using the starter schema and tutorial.
+- **Verification:** `python check.py` reported `Score: 15/15`; `pytest -q test_school_repo.py` reported `5 passed`. The H2 dataset has 300 synthetic interactions; a temporary runtime shim supplied the still-pending R1 feedback insert so the seed script could finish. No team implementation files were changed for the shim.
+
+## Member: truyen_lp
+
+### Session: Lab 5 SQL/Python Practice & Assistant Analytics Queries (F1–F3)
+- **Date**: 2026-11-14
+- **Tool**: Antigravity (Gemini 4 Hydrogen)
+- **Prompt**: "Review docs/team-plan-lab05.md and issue #35, plan and implement truyen_lp's Lab 5 individual practice (Q1–Q15, D1–D3, H2) and team analytics queries (sql/my_queries.sql F1–F3)."
+- **Kept**: Practice SQL queries `Q1–Q15` in `submissions/lab05/truyen_lp/my_answers.sql`, parameterized `sqlite3` functions `D1–D3` in `submissions/lab05/truyen_lp/school_repo.py`, `H2` quality-vs-feedback query in `h2.md`, and `SELECT`-only `F1–F3` queries in `sql/my_queries.sql`.
+- **Changed**:
+  1. Kept `feat/lab05-practice-truyen_lp` strictly scoped to `submissions/lab05/truyen_lp/` and logged AI usage in `feat/lab05-queries-truyen_lp` to satisfy the practice PR folder rule and avoid conflicts.
+  2. Added `AND i.topic IS NOT NULL` in F3 so thumbs-down counts rank named handbook topics (`H26-*`) rather than grouping `NULL` non-rule topics.
+  3. Verified `check.py` (`Score: 15/15`), `pytest -q test_school_repo.py` (`5 passed`), `ruff check .`, full `pytest` (`303 passed`), and all F1–F3/H2 queries against a 300-row seeded `assistant.db` (using an in-memory R1 shim while PR #45 is pending).

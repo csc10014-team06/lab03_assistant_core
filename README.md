@@ -81,6 +81,8 @@ Available environment variables:
 | `ASSISTANT_WEATHER_TIMEOUT_S` | `3` | Seconds to wait for the weather service |
 | `ASSISTANT_CAMPUS_LAT` / `ASSISTANT_CAMPUS_LON` | `10.7626` / `106.6822` | Campus coordinates for the weather request |
 | `ASSISTANT_RATE_LIMIT_PER_MIN` | `30` | Max `POST /v1/chat` requests per client per minute |
+| `ASSISTANT_DB_URL` | `sqlite:///assistant.db` | Database URL (SQLite file, relative to the working directory) |
+| `ASSISTANT_HASH_SALT` | `None` | Secret salt for hashing session ids (min 8 chars); required when the database is used; never logged or in `repr()` |
 
 ---
 
@@ -142,6 +144,23 @@ Or import `api-tests/study-assistant.postman_collection.json` into Postman / Bru
 
 ---
 
+## Database
+
+The assistant uses SQLite with `SQLModel` to persist metadata for chat sessions, interactions, and user feedback without storing raw personal messages.
+
+1. **Apply schema migrations** (safe to run multiple times):
+```bash
+python scripts/migrate.py assistant.db
+```
+
+2. **Seed synthetic data** for local testing or SQL analysis:
+```bash
+python scripts/seed.py assistant.db 300
+```
+
+> **Note:** Never commit `*.db` files or `.env` (which holds `ASSISTANT_HASH_SALT`) to Git.
+
+---
 ## Testing & Code Quality
 
 The test suite includes characterization tests verifying backwards compatibility against the legacy monolith, as well as comprehensive unit tests for each module.
