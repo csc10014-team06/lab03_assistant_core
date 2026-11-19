@@ -52,10 +52,25 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   4. Fixed import formatting using Ruff.
   5. Separated the chat endpoint, rate limiting, and API tests into three Git commits.
 - **Verification**: All three targeted API tests passed, and Ruff reported `All checks passed!`.
+### Session 3: Lab 5 Individual SQL and Python Practice
+- **Date**: 2026-11-13
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Guide me step by step through Lab 5 SQL Q1–Q15, Python D1–D3, and H2 without giving complete solutions.
+- **Kept**: The original practice starter files, SQL question markers, and provided tests.
+- **Changed**: Completed SQL Q1–Q15, implemented D1–D3 using parameterized SQL, and wrote an H2 query about the busiest chatbot hour.
+- **Verification**: `python check.py` — 15/15; `pytest -q test_school_repo.py` — 5 passed.
+
+### Session 4: Lab 5 Chat Interaction Persistence
+- **Date**: 2026-11-13
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Implement chat interaction persistence following docs/team-plan-lab05.md and help debug the API tests.
+- **Kept**: The existing Lab 4 chat endpoint, rate limiting, and the provided Repository.record_interaction() implementation.
+- **Changed**: Added database initialization, response latency measurement, and interaction metadata recording without storing raw messages. Added a persistence test using temporary SQLite.
+- **Verification**: Full pytest — 304 passed; Ruff — all checks passed.
 
 ## Member: nhat_dm
 
-### Session: Lab 4 Service Bridge & Data Models
+### Session 1: Lab 4 Service Bridge & Data Models
 - **Date**: 2026-11-06
 - **Tool**: Antigravity (Gemini 3.8 Flash Medium)
 - **Prompt**: Implement models.py, AssistantService.respond(), and AssistantService.offices() according to docs/team-plan-lab04.md and issue #14.
@@ -64,6 +79,13 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   1. Enforced thousands separators on fee responses for API compatibility (`9,450,000 VND.`).
   2. Isolated CLI commands (`save`, `history`, `stats`) from HTTP execution to prevent unauthorized filesystem access or internal state leaks.
   3. Ensured `handle()` and all Week 3 tests remain completely untouched and green.
+
+### Session 2: Lab 5 Individual SQL & Python Practice
+- **Date**: 2026-11-13
+- **Tool**: Antigravity (Gemini 3.8 Flash Medium)
+- **Prompt**: Complete individual SQL practice Q1-Q15 on school.db, Python repository functions D1-D3 with parameterized queries, and extra question H2 with query and analysis.
+- **Kept**: Completed `my_answers.sql` covering queries Q1–Q15; `school_repo.py` implementing `students_in_program`, `add_student`, `average_grade`, and `transcript`; crafted `h2.md` analyzing at-risk failure proportions across courses.
+- **Verification**: Verified SQL answers via `python check.py` achieving `Score: 15/15`; verified `school_repo.py` via `pytest -q test_school_repo.py` (`5 passed`); verified that `school.db` remains untracked in Git; ensured code formatting adheres to team standards.
 
 ## Member: nhat_npm
 
@@ -92,3 +114,15 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Kept:** The supplied SQL question markers, checker, repository tests, and Lab 5 database contracts.
 - **Changed:** Implemented Q1-Q15 and D1-D3 in my individual folder, added H2 with a result from synthetic data, and completed the data-model/privacy review using the starter schema and tutorial.
 - **Verification:** `python check.py` reported `Score: 15/15`; `pytest -q test_school_repo.py` reported `5 passed`. The H2 dataset has 300 synthetic interactions; a temporary runtime shim supplied the still-pending R1 feedback insert so the seed script could finish. No team implementation files were changed for the shim.
+
+## Member: truyen_lp
+
+### Session: Lab 5 SQL/Python Practice & Assistant Analytics Queries (F1–F3)
+- **Date**: 2026-11-14
+- **Tool**: Antigravity (Gemini 4 Hydrogen)
+- **Prompt**: "Review docs/team-plan-lab05.md and issue #35, plan and implement truyen_lp's Lab 5 individual practice (Q1–Q15, D1–D3, H2) and team analytics queries (sql/my_queries.sql F1–F3)."
+- **Kept**: Practice SQL queries `Q1–Q15` in `submissions/lab05/truyen_lp/my_answers.sql`, parameterized `sqlite3` functions `D1–D3` in `submissions/lab05/truyen_lp/school_repo.py`, `H2` quality-vs-feedback query in `h2.md`, and `SELECT`-only `F1–F3` queries in `sql/my_queries.sql`.
+- **Changed**:
+  1. Kept `feat/lab05-practice-truyen_lp` strictly scoped to `submissions/lab05/truyen_lp/` and logged AI usage in `feat/lab05-queries-truyen_lp` to satisfy the practice PR folder rule and avoid conflicts.
+  2. Added `AND i.topic IS NOT NULL` in F3 so thumbs-down counts rank named handbook topics (`H26-*`) rather than grouping `NULL` non-rule topics.
+  3. Verified `check.py` (`Score: 15/15`), `pytest -q test_school_repo.py` (`5 passed`), `ruff check .`, full `pytest` (`303 passed`), and all F1–F3/H2 queries against a 300-row seeded `assistant.db` (using an in-memory R1 shim while PR #45 is pending).

@@ -7,6 +7,7 @@ Endpoints (v1): GET /health, POST /v1/chat, POST /v1/feedback, GET /v1/feedback 
 
 from __future__ import annotations
 
+import time
 import uuid
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -15,6 +16,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from assistant_api.db import Repository, init_db, make_engine
 from assistant_api.ratelimit import RateLimiter
 from assistant_api.schemas import (
     ChatRequest,
@@ -36,6 +38,9 @@ def create_app(
     settings: Settings | None = None, service: AssistantService | None = None, weather: WeatherClient | None = None
 ) -> FastAPI:
     settings = settings or load_settings()
+    engine = make_engine(settings.db_url)
+    init_db(engine)
+    repo = Repository(engine, settings.require_hash_salt())
     service = service or build_service(settings)
     weather = weather or WeatherClient(
         settings.weather_url, settings.campus_lat, settings.campus_lon, timeout_s=settings.weather_timeout_s
@@ -83,14 +88,36 @@ def create_app(
                 "Too many requests",
             )
 
+        start = time.perf_counter()
+
         resp = service.respond(
             Message(text=req.message, session_id=req.session_id)
         )
 
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        request_id = uuid.uuid4().hex[:12]
+
+        topic = (
+            resp.sources[0].id
+            if resp.intent.value == "rule" and resp.sources
+            else None
+        )
+
+        repo.record_interaction(
+            raw_session=req.session_id,
+            request_id=request_id,
+            intent=resp.intent.value,
+            topic=topic,
+            resolved=resp.intent.value != "unknown",
+            degraded=resp.degraded,
+            latency_ms=elapsed_ms,
+        )
+
         return ChatResponse(
             **resp.model_dump(),
-            request_id=uuid.uuid4().hex[:12],
+            request_id=request_id,
         )
+
 
     @app.post("/v1/feedback", response_model=FeedbackOut, status_code=201, tags=["feedback"])
     def add_feedback(fb: FeedbackIn) -> FeedbackOut:
