@@ -32,3 +32,8 @@ class Response(BaseModel):
     intent: Intent
     sources: list[Source] = Field(default_factory=list)
     degraded: bool = False
+    # Lab 6: which answering path produced this (rules | retrieval | llm | abstain),
+    # whether the student should be handed to a human office, and a 0..1 confidence.
+    path: str = "rules"
+    escalate: bool = False
+    confidence: float | None = None

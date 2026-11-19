@@ -1,0 +1,20 @@
+{"id": "E01", "question": "how many books can I borrow at once", "expect_source": "S26#1", "category": "normal"}
+{"id": "E02", "question": "I lost my student card", "expect_source": "S26#3", "category": "normal"}
+{"id": "E03", "question": "what is the fine for overdue books", "expect_source": "S26#2", "category": "normal"}
+{"id": "E04", "question": "I forgot my email password", "expect_source": "S26#4", "category": "normal"}
+{"id": "E05", "question": "how do I connect to the campus wifi", "expect_source": "S26#5", "category": "normal"}
+{"id": "E06", "question": "what GPA do I need for a merit scholarship", "expect_source": "S26#6", "category": "normal"}
+{"id": "E07", "question": "when can I apply for the dormitory", "expect_source": "S26#7", "category": "normal"}
+{"id": "E08", "question": "is health insurance mandatory", "expect_source": "S26#8", "category": "normal"}
+{"id": "E09", "question": "how much does it cost to retake a course", "expect_source": "H26#1", "category": "normal"}
+{"id": "E10", "question": "how many credits do I need to register a thesis", "expect_source": "H26#2", "category": "normal"}
+{"id": "E11", "question": "what is the maximum credit load per semester", "expect_source": "H26#4", "category": "normal"}
+{"id": "E12", "question": "I missed the final exam because I was sick", "expect_source": "H26#5", "category": "normal"}
+{"id": "E13", "question": "can I get my money back if I drop a class", "expect_source": "H26#8", "category": "synonym"}
+{"id": "E14", "question": "what are the deadlines for retakes", "expect_source": "H26#1", "category": "plural"}
+{"id": "E15", "question": "who at the Training Office can fix a wrong exam grade", "expect_source": "H26#6", "category": "wrong-chunk"}
+{"id": "E16", "question": "what is the capital of France", "expect_abstain": true, "category": "out-of-scope"}
+{"id": "E17", "question": "who will win the football match tonight", "expect_abstain": true, "category": "out-of-scope"}
+{"id": "E18", "question": "what is the weather like tomorrow", "expect_abstain": true, "category": "out-of-scope"}
+{"id": "E19", "question": "did my classmate Minh get a merit scholarship this semester", "expect_abstain": true, "category": "other-person"}
+{"id": "E20", "question": "write me a poem about the moon", "expect_abstain": true, "category": "out-of-scope"}

@@ -19,6 +19,11 @@ ENV_PREFIX = "ASSISTANT_"
 MIN_SALT_LENGTH = 8
 _TRUE_VALUES = {"1", "true", "yes", "on"}
 _FALSE_VALUES = {"0", "false", "no", "off", ""}
+ANSWER_PATHS = ("rules", "retrieval", "llm")
+LLM_PROVIDERS = ("stub", "ollama")
+# Lab 6 variables the tutorial writes without our prefix (e.g. ``LLM_PROVIDER=ollama``);
+# ``ASSISTANT_<name>`` still wins when both are set.
+_UNPREFIXED_OK = frozenset({"RETRIEVAL_MIN_SCORE", "LLM_PROVIDER", "LLM_MODEL"})
 
 
 class ConfigError(ValueError):
@@ -47,6 +52,13 @@ class Settings:
     # --- Lab 5: database -------------------------------------------------
     db_url: str = "sqlite:///assistant.db"  # relative paths are resolved from the working directory
     hash_salt: str | None = field(default=None, repr=False)  # secret; hashes session ids (see require_hash_salt)
+    # --- Lab 6: retrieval + LLM (RAG) ------------------------------------
+    answer_path: str = "llm"  # default CLI path: rules | retrieval | llm
+    retrieval_min_score: float = 2.0  # A1: below this top score we abstain without calling the model
+    retrieval_k: int = 3  # chunks handed to the model
+    llm_provider: str = "stub"  # stub (offline, default) | ollama
+    llm_model: str = "llama3.2"
+    ollama_url: str = "http://localhost:11434"
 
     def __post_init__(self) -> None:
         if self.credit_rate <= 0:
@@ -69,6 +81,14 @@ class Settings:
             raise ConfigError("db_url must be a database URL such as 'sqlite:///assistant.db'")
         if self.hash_salt is not None and len(self.hash_salt) < MIN_SALT_LENGTH:
             raise ConfigError(f"hash_salt must be at least {MIN_SALT_LENGTH} characters long")
+        if self.answer_path not in ANSWER_PATHS:
+            raise ConfigError(f"answer_path must be one of {', '.join(ANSWER_PATHS)}, got {self.answer_path!r}")
+        if not self.retrieval_min_score >= 0:  # also rejects NaN
+            raise ConfigError(f"retrieval_min_score must be >= 0, got {self.retrieval_min_score}")
+        if self.retrieval_k <= 0:
+            raise ConfigError(f"retrieval_k must be positive, got {self.retrieval_k}")
+        if self.llm_provider not in LLM_PROVIDERS:
+            raise ConfigError(f"llm_provider must be one of {', '.join(LLM_PROVIDERS)}, got {self.llm_provider!r}")
 
     def require_hash_salt(self) -> str:
         """Return the salt used to hash session ids, or fail loudly if it was never configured.
@@ -87,6 +107,10 @@ class Settings:
     @property
     def handbook_path(self) -> Path:
         return self.data_dir / "handbook.json"
+
+    @property
+    def kb_dir(self) -> Path:
+        return self.data_dir / "kb"
 
 
 def _parse_int(name: str, raw: str) -> int:
@@ -121,7 +145,10 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         env = os.environ
 
     def get(key: str) -> str | None:
-        return env.get(ENV_PREFIX + key)
+        value = env.get(ENV_PREFIX + key)
+        if value is None and key in _UNPREFIXED_OK:
+            value = env.get(key)
+        return value
 
     overrides: dict[str, object] = {}
     if (raw := get("CREDIT_RATE")) is not None:
@@ -158,5 +185,18 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         overrides["db_url"] = raw
     if raw := get("HASH_SALT"):
         overrides["hash_salt"] = raw
+
+    if raw := get("ANSWER_PATH"):
+        overrides["answer_path"] = raw.strip().lower()
+    if (raw := get("RETRIEVAL_MIN_SCORE")) is not None:
+        overrides["retrieval_min_score"] = _parse_float("ASSISTANT_RETRIEVAL_MIN_SCORE", raw)
+    if (raw := get("RETRIEVAL_K")) is not None:
+        overrides["retrieval_k"] = _parse_int("ASSISTANT_RETRIEVAL_K", raw)
+    if raw := get("LLM_PROVIDER"):
+        overrides["llm_provider"] = raw.strip().lower()
+    if raw := get("LLM_MODEL"):
+        overrides["llm_model"] = raw
+    if raw := get("OLLAMA_URL"):
+        overrides["ollama_url"] = raw
 
     return Settings(**overrides)  # type: ignore[arg-type]

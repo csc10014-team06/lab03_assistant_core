@@ -16,6 +16,8 @@ The monolithic codebase (`monolith/assistant_monolith.py`) was decomposed into c
 - **`llm.py`**: Decoupled LLM client protocol (`LLMClient`) with deterministic `FakeLLM` for testing and `DemoLLM` for demonstration.
 - **`service.py`**: Central coordinator (`AssistantService`) orchestrating intent routing, query history, session statistics, and secure history export without path traversal.
 - **`cli.py`**: CLI entry point supporting both one-shot queries and interactive REPL mode with configurable structured logging.
+- **`rag/`** (Lab 6): `index.py` loads the handbook knowledge base (`data/kb/*.md`) and searches it; `answerer.py` answers from the best chunks, abstains below `RETRIEVAL_MIN_SCORE` without calling the model (A1), and only shows model drafts that cite retrieved chunks (A2 grounding check in `llm.parse_draft`).
+- **`evaluation.py`** (Lab 6): scores the rules / retrieval / llm paths on `eval/cases.jsonl`.
 
 ---
 
@@ -83,6 +85,12 @@ Available environment variables:
 | `ASSISTANT_RATE_LIMIT_PER_MIN` | `30` | Max `POST /v1/chat` requests per client per minute |
 | `ASSISTANT_DB_URL` | `sqlite:///assistant.db` | Database URL (SQLite file, relative to the working directory) |
 | `ASSISTANT_HASH_SALT` | `None` | Secret salt for hashing session ids (min 8 chars); required when the database is used; never logged or in `repr()` |
+| `ASSISTANT_ANSWER_PATH` | `llm` | Default CLI answering path: `rules`, `retrieval` or `llm` |
+| `ASSISTANT_RETRIEVAL_MIN_SCORE` (or `RETRIEVAL_MIN_SCORE`) | `2.0` | A1: abstain when the best chunk scores below this |
+| `ASSISTANT_RETRIEVAL_K` | `3` | Chunks handed to the model |
+| `ASSISTANT_LLM_PROVIDER` (or `LLM_PROVIDER`) | `stub` | `stub` (offline, deterministic) or `ollama` |
+| `ASSISTANT_LLM_MODEL` (or `LLM_MODEL`) | `llama3.2` | Model name for Ollama |
+| `ASSISTANT_OLLAMA_URL` | `http://localhost:11434` | Ollama server |
 
 ---
 
@@ -159,6 +167,34 @@ python scripts/seed.py assistant.db 300
 ```
 
 > **Note:** Never commit `*.db` files or `.env` (which holds `ASSISTANT_HASH_SALT`) to Git.
+
+---
+
+## Lab 6: answering from the handbook (RAG)
+
+Offline by default (stub model, no API key). `python -m assistant_core` reads `.env`.
+
+```bash
+python -m assistant_core "I lost my student card"
+# A lost or damaged student card must be reported to Student Affairs (room I.102). ... (source: S26#3)
+
+python -m assistant_core "what is the capital of France"
+# Sorry, I could not find this in the student handbook. Please contact the Training Office (room I.101, ...).
+
+python -m assistant_core --path rules "I lost my student card"   # the Lab 3 keyword rules, kept for comparison
+```
+
+**Eval** — compare the three paths on `eval/cases.jsonl`:
+
+```bash
+python eval/compare_paths.py                              # table: rules 9/20 · retrieval 16/20 · llm (stub) 16/20
+python eval/compare_paths.py --include-submissions        # + every member's H1 cases
+python eval/compare_paths.py --json eval/results.json --min-pass retrieval=16   # metrics file + CI gate
+LLM_PROVIDER=ollama LLM_MODEL=llama3.2 python eval/compare_paths.py              # bonus: real local model
+```
+
+Individual Lab 6 work lives in `submissions/lab06/<member>/`; check it with `python submissions/lab06/check.py <member>`.
+Team plan: `docs/team-plan-lab06.md`. Baseline analysis: `docs/lab6/path_comparison.md`.
 
 ---
 ## Testing & Code Quality

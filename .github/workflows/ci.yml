@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "feat/**", "feature/**", "chore/**" ]
+    branches: [ "main", "feat/**", "feature/**", "chore/**", "lab6/**" ]
   pull_request:
     branches: [ "main" ]
 
@@ -34,3 +34,14 @@ jobs:
       - name: Run tests with pytest
         run: |
           pytest
+
+      - name: Eval gate (Lab 6) — retrieval and llm (stub) must not get worse
+        run: |
+          python eval/compare_paths.py --min-pass retrieval=16 --min-pass llm=16 --json eval-results.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload eval metrics
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: eval-results.json
