@@ -36,6 +36,7 @@ exclude = [
     "monolith",
     "worksheets",
     "submissions",
+    "lab06/practice",  # Lab 6 warm-up ships with TODOs (unused variables until S1-S3 are done)
     ".venv",
 ]
 

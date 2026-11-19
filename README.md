@@ -161,6 +161,25 @@ python scripts/seed.py assistant.db 300
 > **Note:** Never commit `*.db` files or `.env` (which holds `ASSISTANT_HASH_SALT`) to Git.
 
 ---
+## Lab 6: AI services (RAG)
+
+The Lab 6 app lives in [`lab06/starter/`](lab06/starter/README.md). It is self-contained (its own `assistant_core`,
+knowledge base, tests and eval) and runs offline with a stub model. Give it **its own** virtual environment:
+
+```bash
+cd lab06/starter
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip install -e .
+cp .env.example .env
+pytest -q                                            # 42 passed
+python -m assistant_core "I lost my student card"    # answer + source S26#3
+python eval/compare_paths.py                         # deterministic 7/20 · retrieval 16/20 · llm (stub) 16/20
+```
+
+Individual work goes in `submissions/lab06/<member>/`; check it with `python submissions/lab06/check.py <member>`.
+Team plan: `docs/team-plan-lab06.md` · baseline: `docs/lab6/path_comparison.md`.
+
+---
 ## Testing & Code Quality
 
 The test suite includes characterization tests verifying backwards compatibility against the legacy monolith, as well as comprehensive unit tests for each module.
