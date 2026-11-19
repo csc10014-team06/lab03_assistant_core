@@ -93,6 +93,12 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   5. Verified that raw session IDs and message text are never stored in the database.
   6. Verified that scripts/migrate.py runs multiple times safely without errors.
 - **Verification**: All 316 tests green in pytest; Ruff check clean.
+### Session 2: Lab 5 Individual SQL & Python Practice
+- **Date**: 2026-11-13
+- **Tool**: Antigravity (Gemini 3.8 Flash Medium)
+- **Prompt**: Complete individual SQL practice Q1-Q15 on school.db, Python repository functions D1-D3 with parameterized queries, and extra question H2 with query and analysis.
+- **Kept**: Completed `my_answers.sql` covering queries Q1–Q15; `school_repo.py` implementing `students_in_program`, `add_student`, `average_grade`, and `transcript`; crafted `h2.md` analyzing at-risk failure proportions across courses.
+- **Verification**: Verified SQL answers via `python check.py` achieving `Score: 15/15`; verified `school_repo.py` via `pytest -q test_school_repo.py` (`5 passed`); verified that `school.db` remains untracked in Git; ensured code formatting adheres to team standards.
 
 ## Member: nhat_npm
 
@@ -121,3 +127,48 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Kept**: The starter's R1 body (add, commit, refresh, return) and its `create_app(..., repo=None)` wiring; the starter's `test_feedback_roundtrip` shape.
 - **Changed**: R2 sorts by `created_at DESC, id DESC` so rows saved in the same clock tick keep a stable order; the default repository uses our `db_url` and `require_hash_salt()` settings; API tests use an in-memory database; added tests for the 404 and newest-first order; updated the feedback rows of `worksheets/api_contract.md`.
 - **Verification**: `python check.py` → `Score: 15/15`, `pytest -q test_school_repo.py` → `5 passed`; full `pytest` → 305 passed, `ruff check .` clean; a manual run against a temp SQLite file showed 201 / 404 / 401 and the row still listed after re-creating the app.
+
+## Member: long_th
+
+### Session: Lab 4 config, dependencies and packaging (issue #13)
+- **Date**: 2026-11-05
+- **Tool**: Claude Code
+- **Prompt**: Do the long_th tasks of the Lab 4 plan: add the API settings, merge FastAPI/httpx/uvicorn into the dependency files, package `assistant_api`, extend `.env.example`, add tests.
+- **Kept**: Six new `Settings` fields read from `ASSISTANT_*` variables, the admin key hidden from `repr()`, validation raising `ConfigError`, pinned versions in `requirements.txt` and ranges in `pyproject.toml`, and `tests/test_config_api.py` (24 tests, no existing test modified).
+- **Changed**: The AI-written commit was cherry-picked onto the member's own branch. `ruff check` and `pytest` were run against it (all clean) before it was pushed.
+
+### Session: Lab 5 database settings and review of practice answers (issue #31)
+- **Date**: 2026-11-12
+- **Tool**: Claude Code
+- **Prompt**: (1) Do the long_th config task of the Lab 5 plan: database URL, secret salt for hashing session ids, `sqlmodel` dependency. (2) Review my SQL Q1-Q15 and `school_repo.py` D1-D3 and check the commit on my branch. (3) Draft the H2 question and query (`submissions/lab05/long_th/h2.md`).
+- **Kept**: `db_url` and `hash_salt` settings (salt hidden from `repr()`, minimum length, no default, `require_hash_salt()` failing loudly), `sqlmodel==0.0.22` pinned, and `tests/test_config_db.py` (17 tests, no existing test modified).
+- **Changed**: Claude Code reviewed the practice answers (Q1-Q15, D1-D3; see the next entry for the other assistant used while writing them) and pointed out `con.commit;` (missing parentheses, so inserts were not saved), `credits >= 4` instead of `= 4` in Q6, a missing `ORDER BY` in Q8, and a wrongly named file (`my_answer.sql`). The member fixed the file name, the commit call and Q6; the AI added the Q8 `ORDER BY` and removed stray semicolons/whitespace. The scores in the folder README are the member's own `check.py` / `pytest` results. Claude Code also drafted the H2 question and its SQL query (validated for syntax on a stand-in table); the member ran it on their own seeded `assistant.db` and Claude Code transcribed the output from their terminal screenshot and wrote the short interpretation in `h2.md`. Claude Code also gave a small script to patch R1/R2 (from tutorial E.4/E.5) into the local starter `db.py` so that `seed.py` could run.
+
+### Session: Lab 5 practice, editor assistant (Q1-Q15, D1-D3)
+- **Date**: 2026-11-12
+- **Tool**: Gemini (chat assistant in the code editor)
+- **Prompt**: Help with `school_repo.py` (the `transcript` JOIN query, D3) and with running `pytest`.
+- **Kept**: The code it suggested for `school_repo.py`, in particular the `transcript` JOIN query (D3), which is identical to the code shown in its chat panel. It also explained that the `pytest` failure came from an older system Python and how to recreate the virtual environment with Python 3.10.
+- **Changed**: Used its suggestions and then tested them myself: `python check.py` gives 15/15 and `pytest -q test_school_repo.py` gives 5 passed. No other practice answers were taken from it.
+
+## Member: nhat_npm
+
+### Session: Lab 5 individual practice and privacy review
+- **Date:** 2026-11-13
+- **Tool:** OpenAI Codex
+- **Prompt:** "Pull latest main, copy the Lab 5 materials, and complete Nhat_NPM's assigned tasks."
+- **Kept:** The supplied SQL question markers, checker, repository tests, and Lab 5 database contracts.
+- **Changed:** Implemented Q1-Q15 and D1-D3 in my individual folder, added H2 with a result from synthetic data, and completed the data-model/privacy review using the starter schema and tutorial.
+- **Verification:** `python check.py` reported `Score: 15/15`; `pytest -q test_school_repo.py` reported `5 passed`. The H2 dataset has 300 synthetic interactions; a temporary runtime shim supplied the still-pending R1 feedback insert so the seed script could finish. No team implementation files were changed for the shim.
+
+## Member: truyen_lp
+
+### Session: Lab 5 SQL/Python Practice & Assistant Analytics Queries (F1–F3)
+- **Date**: 2026-11-14
+- **Tool**: Antigravity (Gemini 4 Hydrogen)
+- **Prompt**: "Review docs/team-plan-lab05.md and issue #35, plan and implement truyen_lp's Lab 5 individual practice (Q1–Q15, D1–D3, H2) and team analytics queries (sql/my_queries.sql F1–F3)."
+- **Kept**: Practice SQL queries `Q1–Q15` in `submissions/lab05/truyen_lp/my_answers.sql`, parameterized `sqlite3` functions `D1–D3` in `submissions/lab05/truyen_lp/school_repo.py`, `H2` quality-vs-feedback query in `h2.md`, and `SELECT`-only `F1–F3` queries in `sql/my_queries.sql`.
+- **Changed**:
+  1. Kept `feat/lab05-practice-truyen_lp` strictly scoped to `submissions/lab05/truyen_lp/` and logged AI usage in `feat/lab05-queries-truyen_lp` to satisfy the practice PR folder rule and avoid conflicts.
+  2. Added `AND i.topic IS NOT NULL` in F3 so thumbs-down counts rank named handbook topics (`H26-*`) rather than grouping `NULL` non-rule topics.
+  3. Verified `check.py` (`Score: 15/15`), `pytest -q test_school_repo.py` (`5 passed`), `ruff check .`, full `pytest` (`303 passed`), and all F1–F3/H2 queries against a 300-row seeded `assistant.db` (using an in-memory R1 shim while PR #45 is pending).
