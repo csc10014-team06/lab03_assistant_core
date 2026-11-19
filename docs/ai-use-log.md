@@ -82,3 +82,15 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Prompt**: Implement issue #17 (T2 `POST /v1/feedback`, T3 `GET /v1/feedback` admin) following `docs/team-plan-lab04.md`.
 - **Kept**: The starter's 3-line T2 body (in-memory `feedback_store`, `id = len + 1`, UTC `created_at`) and the 1-line T3 body relying on the existing `require_admin` dependency.
 - **Changed**: Added the missing `datetime` import, removed the now-unused `noqa`, pasted the starter's `test_feedback_roundtrip` and `test_feedback_rating_out_of_range` unchanged into `tests/test_api.py`, filled the feedback rows of `worksheets/api_contract.md`, and verified 201 / 422 / 401 / 200 with `api-tests/curl_tests.sh`.
+
+## Member: truyen_lp
+
+### Session: Lab 5 SQL/Python Practice & Assistant Analytics Queries (F1–F3)
+- **Date**: 2026-11-14
+- **Tool**: Antigravity (Gemini 4 Hydrogen)
+- **Prompt**: "Review docs/team-plan-lab05.md and issue #35, plan and implement truyen_lp's Lab 5 individual practice (Q1–Q15, D1–D3, H2) and team analytics queries (sql/my_queries.sql F1–F3)."
+- **Kept**: Practice SQL queries `Q1–Q15` in `submissions/lab05/truyen_lp/my_answers.sql`, parameterized `sqlite3` functions `D1–D3` in `submissions/lab05/truyen_lp/school_repo.py`, `H2` quality-vs-feedback query in `h2.md`, and `SELECT`-only `F1–F3` queries in `sql/my_queries.sql`.
+- **Changed**:
+  1. Kept `feat/lab05-practice-truyen_lp` strictly scoped to `submissions/lab05/truyen_lp/` and logged AI usage in `feat/lab05-queries-truyen_lp` to satisfy the practice PR folder rule and avoid conflicts.
+  2. Added `AND i.topic IS NOT NULL` in F3 so thumbs-down counts rank named handbook topics (`H26-*`) rather than grouping `NULL` non-rule topics.
+  3. Verified `check.py` (`Score: 15/15`), `pytest -q test_school_repo.py` (`5 passed`), `ruff check .`, full `pytest` (`303 passed`), and all F1–F3/H2 queries against a 300-row seeded `assistant.db` (using an in-memory R1 shim while PR #45 is pending).
