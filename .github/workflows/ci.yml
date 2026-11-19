@@ -35,13 +35,41 @@ jobs:
         run: |
           pytest
 
-      - name: Eval gate (Lab 6) — retrieval and llm (stub) must not get worse
-        run: |
-          python eval/compare_paths.py --min-pass retrieval=16 --min-pass llm=16 --json eval-results.json >> "$GITHUB_STEP_SUMMARY"
+  lab06-starter:
+    # Lab 6 reference app (lab06/starter): its own pinned requirements, tests and eval gate.
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    defaults:
+      run:
+        working-directory: lab06/starter
 
-      - name: Upload eval metrics
-        if: matrix.python-version == '3.12'
-        uses: actions/upload-artifact@v4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
-          name: eval-results
-          path: eval-results.json
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Run tests (42 expected)
+        run: pytest -q
+
+      - name: Eval gate — retrieval and llm (stub) must stay >= 16/20
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python eval/compare_paths.py --min-correct 16 | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Evaluate members' H1 cases too (report only)
+        run: python eval/compare_paths.py --include-submissions

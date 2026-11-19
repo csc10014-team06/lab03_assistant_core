@@ -2,6 +2,6 @@
 
 import sys
 
-from assistant_core.cli import entrypoint
+from assistant_core.cli import main
 
-sys.exit(entrypoint())
+sys.exit(main())

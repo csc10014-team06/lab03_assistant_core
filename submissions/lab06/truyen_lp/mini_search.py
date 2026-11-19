@@ -1,52 +1,38 @@
-"""Lab 6 practice — T1 (S1–S3): a mini search engine over 4 documents.
+"""Lab 6 warm-up: build a tiny search engine with the data structures you already know.
 
-Fill in the three TODOs, then run (from your folder):
-
-    pytest -q test_mini_search.py          # -> 4 passed
-    python mini_search.py                  # prints the two checks from the lab sheet
+No AI here — just dictionaries, sets and sorting (DSA!). Run the tests:  pytest -q test_mini_search.py
 """
-from __future__ import annotations
-
 import re
 
 DOCS = {
-    "D1": "Library opening hours: the library opens at 7am and closes at 8pm.",
-    "D2": "Tuition is charged per credit; retake credits cost 1.5 times more.",
-    "D3": "Report a lost student card to Student Affairs to get a new card.",
-    "D4": "Final exam absence requires medical evidence within 3 working days.",
+    "D1": "Students may register a thesis with at least 120 credits and a GPA of 2.0.",
+    "D2": "Retake credits are charged at 1.5 times the normal credit rate.",
+    "D3": "A lost student card can be replaced at Student Affairs in room I.102.",
+    "D4": "Students may borrow up to 5 books from the library for 14 days.",
 }
-
-STOPWORDS = {
-    "a", "an", "and", "are", "at", "for", "get", "i", "in", "is", "it", "me", "my", "new",
-    "of", "on", "or", "per", "the", "to", "what", "when", "where", "with",
-}
+STOP = {"a", "an", "the", "at", "of", "for", "to", "in", "can", "be", "is", "my", "i", "may", "with", "and", "up", "from"}
 
 
 def tokenize(text: str) -> list[str]:
-    """Given: lower-case words without punctuation or stopwords."""
-    return [w for w in re.findall(r"[a-z0-9]+", text.lower()) if w not in STOPWORDS]
+    """'Lost my card!' -> ['lost', 'card']  (lower-case words, stop words removed) — given."""
+    return [w for w in re.findall(r"\w+", text.lower()) if w not in STOP]
 
 
 def build_index(docs: dict[str, str]) -> dict[str, set[str]]:
-    """S1 — inverted index: word -> set of doc_ids that contain it."""
+    """Inverted index: word -> set of document ids that contain it.
+
+    Example: {"thesis": {"D1"}, "credits": {"D1", "D2"}, ...}
+    """
     index: dict[str, set[str]] = {}
-    # TODO S1: for each (doc_id, text) and each word in tokenize(text):
+    # TODO S1: for each (doc_id, text) in docs.items(), for each word in tokenize(text):
     #          index.setdefault(word, set()).add(doc_id)
-    raise NotImplementedError("S1: build_index")
     return index
 
 
 def search(index: dict[str, set[str]], query: str, k: int = 2) -> list[tuple[str, int]]:
-    """S2 + S3 — score = number of query words found in the doc; best k first."""
+    """Score = number of query words found in the document. Return the top k (doc_id, score),
+    highest score first; ties broken by doc_id. Documents with score 0 are not returned."""
     scores: dict[str, int] = {}
-    # TODO S2: for each word in tokenize(query), add 1 to every doc_id in index.get(word, set())
-    # TODO S3: sort by score descending, then doc_id ascending, keep the first k:
-    #          sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:k]
-    raise NotImplementedError("S2/S3: search")
+    # TODO S2: for each word in tokenize(query): for each doc_id in index.get(word, set()): scores[doc_id] += 1
+    # TODO S3: sort by (-score, doc_id) and return the first k
     return []
-
-
-if __name__ == "__main__":
-    idx = build_index(DOCS)
-    print(search(idx, "I lost my student card"))         # expected [('D3', 3)]
-    print(search(idx, "what is the capital of France"))  # expected []

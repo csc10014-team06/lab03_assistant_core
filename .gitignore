@@ -33,7 +33,3 @@ Thumbs.db
 *.db-shm
 *.sqlite
 *.sqlite3
-
-# Lab 6 eval output (regenerate with eval/compare_paths.py --json)
-eval/results.json
-eval-results.json

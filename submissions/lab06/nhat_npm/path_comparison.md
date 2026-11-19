@@ -2,9 +2,11 @@
 
 ## T4 — base 20 cases
 
-<!-- From the repo root: python eval/compare_paths.py   — paste everything it prints below. -->
+<!-- cd lab06/starter && python eval/compare_paths.py   — paste everything it prints between the fences. -->
 
+```
 (paste the output here)
+```
 
 ### 3 sentences (exactly one per line, replace TODO)
 
@@ -14,8 +16,10 @@
 
 ## T5 — with my 5 H1 cases (E36–E40)
 
-<!-- python eval/compare_paths.py --cases eval/cases.jsonl submissions/lab06/nhat_npm/h1_cases.jsonl -->
+<!-- cd lab06/starter && python eval/compare_paths.py ../../submissions/lab06/nhat_npm/h1_cases.jsonl -->
 
+```
 (paste the output here)
+```
 
 Why a case fails: TODO

@@ -31,7 +31,6 @@ from assistant_core.handbook import best_rule
 from assistant_core.llm import LLMClient, LLMError
 from assistant_core.models import Intent, Message, Response, Source
 from assistant_core.offices import find_office
-from assistant_core.rag.answerer import RagAnswerer
 
 log = logging.getLogger(__name__)
 
@@ -41,8 +40,6 @@ _FEE_PATTERN = re.compile(r"\b(fees?|tuition)\b", re.IGNORECASE)
 
 # Words that indicate rule/handbook intent (used in stats only).
 _RULE_KEYWORDS = frozenset({"thesis", "retake", "exam", "credit"})
-
-_GREETINGS = frozenset({"hi", "hello", "hey", "xin chao"})
 
 
 class AssistantService:
@@ -70,13 +67,11 @@ class AssistantService:
         offices: dict[str, Office],
         rules: list[Rule],
         llm: LLMClient,
-        rag: RagAnswerer | None = None,
     ) -> None:
         self._settings = settings
         self._offices = offices
         self._rules = rules
         self._llm = llm
-        self._rag = rag                        # Lab 6: retrieval / llm paths
         self._history: list[str] = []          # replaces the global ``history``
 
     # ------------------------------------------------------------------
@@ -174,28 +169,6 @@ class AssistantService:
             sources=[],
             degraded=False,
         )
-
-    def ask(self, message: str, path: str | None = None) -> Response:
-        """Answer *message* through one of the three Lab 6 paths and return a typed Response.
-
-        * ``rules``     — exactly :meth:`respond` (keyword rules, unchanged since Lab 3).
-        * ``retrieval`` — greetings, fees and office look-ups stay rule-based (they compute or look up
-          structured data); every other question is answered from the KB, abstaining below the threshold.
-        * ``llm``       — like ``retrieval`` but the answer is drafted by the model and grounding-checked.
-
-        Without a knowledge base (``rag=None``) every path falls back to the rules.
-        """
-        path = path or self._settings.answer_path
-        self._history.append(message)
-        m = message.lower().strip()
-        if path == "rules" or self._rag is None or not m or self.routes_to_rules(message):
-            return self.respond(Message(text=message or " "))
-        return self._rag.answer(message, use_llm=(path == "llm"))
-
-    def routes_to_rules(self, message: str) -> bool:
-        """True for greetings, fee questions and office look-ups, which every path answers with rules."""
-        m = message.lower().strip()
-        return m in _GREETINGS or bool(_FEE_PATTERN.search(m)) or find_office(message, self._offices) is not None
 
     def offices(self) -> list[Office]:
         """Return all offices sorted by name.
