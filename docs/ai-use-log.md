@@ -172,3 +172,13 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
   1. Kept `feat/lab05-practice-truyen_lp` strictly scoped to `submissions/lab05/truyen_lp/` and logged AI usage in `feat/lab05-queries-truyen_lp` to satisfy the practice PR folder rule and avoid conflicts.
   2. Added `AND i.topic IS NOT NULL` in F3 so thumbs-down counts rank named handbook topics (`H26-*`) rather than grouping `NULL` non-rule topics.
   3. Verified `check.py` (`Score: 15/15`), `pytest -q test_school_repo.py` (`5 passed`), `ruff check .`, full `pytest` (`303 passed`), and all F1–F3/H2 queries against a 300-row seeded `assistant.db` (using an in-memory R1 shim while PR #45 is pending).
+
+
+## Member: nhat_dm
+
+### Session: Lab 6 RAG, Grounding, Evaluation, and Individual Practice (issue #58)
+- **Date**: 2026-11-20
+- **Tool**: Antigravity
+- **Prompt**: "Review issue #58 and lab06 starter; implement mini_search S1-S3, execute path comparison eval, design 5 evaluation cases E41-E45, and draft reflection."
+- **Kept**: S1 inverted index building, S2 scoring, and S3 top-k sorting in `submissions/lab06/nhat_dm/mini_search.py`; H1 cases E41–E45 in `h1_cases.jsonl` (3 verified handbook/services/fees targets + 2 abstains for out-of-scope and privacy); and H2 open-book exam reflection highlighting code grounding checks and min_score thresholds.
+- **Verification**: `pytest -q test_mini_search.py` passed (4/4); `python eval/compare_paths.py` evaluated at 21/25 correct with all 5 new cases passing on retrieval and stub LLM; `python submissions/lab06/check.py nhat_dm` reports 6/6 points and all items [PASS].
