@@ -68,6 +68,19 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Changed**: Added database initialization, response latency measurement, and interaction metadata recording without storing raw messages. Added a persistence test using temporary SQLite.
 - **Verification**: Full pytest — 304 passed; Ruff — all checks passed.
 
+### Session 5: Lab 6 AI Services, RAG and Evaluation
+- **Date**: 2026-11-20
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Guide me step by step through Lab 6 tasks T1–T7, explain RAG, grounding and abstention, and help me evaluate the assistant using StubLLM and Ollama.
+- **Kept**: The original starter code, provided tests, existing A1/A2 implementation, evaluation framework and submission templates.
+- **Changed**:
+  1. Implemented S1–S3 using dictionaries, sets, search scoring and sorting.
+  2. Studied and verified the grounding and abstention checks.
+  3. Added five H1 evaluation cases (E26–E30) with AI assistance.
+  4. Used AI assistance to draft the comparison analysis, H2 reflection and submission documentation.
+  5. Installed Ollama and evaluated Llama 3.2 locally without modifying shared application code.
+- **Verification**: Starter tests — 42 passed; mini search — 4 passed; A1/A2 — 2 passed; baseline retrieval and stub — 16/20; H1 evaluation — 21/25; Ollama — 17/20; individual self-check — all required checks passed, 7/6 including bonus.
+
 ## Member: nhat_dm
 
 ### Session 1: Lab 4 Service Bridge & Data Models
