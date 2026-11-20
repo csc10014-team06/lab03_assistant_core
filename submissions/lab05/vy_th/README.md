@@ -5,7 +5,7 @@ Individual submission. Change **only this folder** in your PR. Rules: `docs/team
 ## Files (copy the practice files here, see `../README.md`)
 - [x] `my_answers.sql` — Q1–Q10 (must), Q11–Q15 (should)
 - [x] `school_repo.py` — D1–D3 (must), including `test_d1_no_sql_injection`
-- [ ] `h2.md` — H2 (should): one more useful question about the assistant data, its query, and the pasted result
+- [x] `h2.md` — H2 (should): one more useful question about the assistant data, its query, and the pasted result
 - [x] `make_school_db.py`, `check.py`, `test_school_repo.py` — copied unchanged
 - [x] No `school.db` committed
 
