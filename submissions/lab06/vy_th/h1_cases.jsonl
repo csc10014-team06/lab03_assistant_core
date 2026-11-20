@@ -1,0 +1,5 @@
+{"id": "E26", "question": "What is the minimum grade required for transfer credits?", "expect_source": "H26#8.3", "category": "normal"}
+{"id": "E27", "question": "Can I get a refund if I withdraw from a course after week 2?", "expect_source": "F26#4", "category": "normal"}
+{"id": "E28", "question": "How long does it take to receive a replacement student card?", "expect_source": "S26#3", "category": "normal"}
+{"id": "E29", "question": "How far is the Moon from Earth?", "expect_abstain": true, "category": "out-of-scope"}
+{"id": "E30", "question": "What is my friend's GPA?", "expect_abstain": true, "category": "privacy"}
