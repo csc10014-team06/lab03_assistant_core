@@ -16,6 +16,50 @@ check = importlib.util.module_from_spec(_spec)
 sys.modules["lab06_check"] = check  # dataclasses look the module up while the file executes
 _spec.loader.exec_module(check)  # type: ignore[union-attr]
 
+# Blank templates as shipped in every member folder. Kept here (not read from a member folder) because members fill
+# their own copies in; reading e.g. long_th/reflection.md broke these tests as soon as long_th submitted.
+REFLECTION_TEMPLATE = """# Lab 6 — H2 reflection (<member>)
+
+Explain RAG to a friend who never studied AI, using the picture of an open-book exam. Mention at least one
+thing **our code** checks that the model does not (e.g. the grounding check, or the `min_score` threshold).
+Exactly 5 lines between the markers, in your own words (English or Vietnamese). Do not copy a teammate.
+
+<!-- reflection:start -->
+TODO line 1
+TODO line 2
+TODO line 3
+TODO line 4
+TODO line 5
+<!-- reflection:end -->
+"""
+
+COMPARISON_TEMPLATE = """# Lab 6 — Path comparison (<member>)
+
+## T4 — base 20 cases
+
+<!-- cd lab06/starter && python eval/compare_paths.py   — paste everything it prints between the fences. -->
+
+```
+(paste the output here)
+```
+
+### 3 sentences (exactly one per line, replace TODO)
+
+(a) For handbook questions I would use: TODO
+(b) Because: TODO
+(c) The failure I would fix first (one of E13, E14, E15, E19): TODO
+
+## T5 — with my 5 H1 cases (E21–E25)
+
+<!-- cd lab06/starter && python eval/compare_paths.py ../../submissions/lab06/<member>/h1_cases.jsonl -->
+
+```
+(paste the output here)
+```
+
+Why a case fails: TODO
+"""
+
 GOOD = [
     {"id": "E21", "question": "how many books can I borrow", "expect_source": "S26#1", "category": "normal"},
     {"id": "E22", "question": "where do I replace a lost student card", "expect_source": "S26#3", "category": "normal"},
@@ -82,7 +126,7 @@ def test_h1_bad_cases_fail(tmp_path, mutate, match):
 
 
 def test_reflection_template_fails_and_filled_passes(tmp_path):
-    template = (ROOT / "submissions" / "lab06" / "long_th" / "reflection.md").read_text(encoding="utf-8")
+    template = REFLECTION_TEMPLATE
     (tmp_path / "reflection.md").write_text(template, encoding="utf-8")
     assert not check.check_reflection(tmp_path).ok
     filled = template
@@ -93,10 +137,26 @@ def test_reflection_template_fails_and_filled_passes(tmp_path):
 
 
 def test_comparison_template_fails(tmp_path):
-    template = (ROOT / "submissions" / "lab06" / "long_th" / "path_comparison.md").read_text(encoding="utf-8")
+    template = COMPARISON_TEMPLATE
     (tmp_path / "path_comparison.md").write_text(template, encoding="utf-8")
     t4, t5 = check.check_comparison(tmp_path)
     assert not t4.ok and not t5.ok
+
+
+def test_templates_match_an_unfilled_member_folder():
+    """The inline templates must stay in sync with what new member folders get (any still-unfilled folder)."""
+    for member in check.MEMBERS:
+        folder = ROOT / "submissions" / "lab06" / member
+        text = (folder / "reflection.md").read_text(encoding="utf-8")
+        if "TODO line 1" in text:
+            assert text == REFLECTION_TEMPLATE.replace("<member>", member)
+            return
+    pytest.skip("every member has filled in reflection.md")
+
+
+def test_points_total_excludes_bonus():
+    items = [check.Item("T1", True, 2, 2, ""), check.Item("T7 bonus", True, 1, 0, "", required=False)]
+    assert check.points(items) == (2, 1)
 
 
 def test_t1_detects_edited_test_file(tmp_path):
