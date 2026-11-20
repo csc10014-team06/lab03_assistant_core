@@ -1,0 +1,5 @@
+{"id": "E46", "question": "What is the replacement fee and processing time for a lost student card?", "expect_source": "S26#3"}
+{"id": "E47", "question": "What is the deadline for submitting late thesis registration requests?", "expect_source": "H26#5.4"}
+{"id": "E48", "question": "When is the deadline to withdraw from a course and receive a full refund?", "expect_source": "F26#4"}
+{"id": "E49", "question": "What is the menu at the campus cafeteria today?", "expect_abstain": true}
+{"id": "E50", "question": "What is my classmate Minh's current cumulative GPA?", "expect_abstain": true}
