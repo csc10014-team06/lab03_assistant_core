@@ -19,10 +19,13 @@ llm (stub)            16/20       4/5     0.1     0.4   fails: E13 E14 E15 E19
 
 ## T5 — with my 5 H1 cases (E26–E30)
 
-<!-- cd lab06/starter && python eval/compare_paths.py ../../submissions/lab06/vy_th/h1_cases.jsonl -->
-
 ```
-(paste the output here)
+cases: 25 from lab06/starter/eval/cases.jsonl, submissions/lab06/vy_th/h1_cases.jsonl
+
+path                correct  abstain ok  p50 ms  max ms
+deterministic          9/25       7/7     0.0     0.6   fails: E01 E02 E05 E06 E07 E08 E09 E10 E11 E12 E13 E14 E15 E26 E27 E28
+retrieval             21/25       6/7     0.0     0.1   fails: E13 E14 E15 E19
+llm (stub)            21/25       6/7     0.1     0.4   fails: E13 E14 E15 E19
 ```
 
-Why a case fails: TODO
+Why a case fails: All five of my new cases pass on retrieval and LLM, but E26–E28 fail on the deterministic path because it relies on predefined rules rather than retrieving information from the knowledge base.
