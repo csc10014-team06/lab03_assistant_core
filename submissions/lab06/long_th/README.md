@@ -37,6 +37,6 @@ Individual points found by this script: 6/6, bonus +1  (+ A1/A2 4 pts in lab06/s
   with the team's log update.
 - **Used for:** S1–S3 in `mini_search.py`; choosing and checking the 5 H1 cases against the real service (it traced why
   E23 goes to the fee tool and why the privacy guard misses E25); the 3 sentences and the failure sentence; running the
-  H3 experiment and writing `bonus.md`; a first draft of the reflection.
+  H3 experiment and writing `bonus.md`; writing the 5-line reflection (`reflection.md`), at my request.
 - **Checked by me:** `pytest -q test_mini_search.py` (4 passed), `python submissions/lab06/check.py long_th` (all PASS),
   the pasted tables are the real `compare_paths.py` output, the H3 change was reverted (not in this PR).
