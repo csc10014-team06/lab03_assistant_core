@@ -27,7 +27,7 @@ Branch `lab6/long_th` · PR title `Lab 6 – long_th – A1/A2 + comparison` · 
 ```
 [PASS] T1 mini search 2/2 · [PASS] T4 comparison 1/1 · [PASS] T5 H1 cases 2/2 · [PASS] T5 re-run output
 [PASS] T6 reflection 1/1 · [PASS] hygiene · [PASS] T7 bonus (H3)
-Individual points found by this script: 7/6  (6/6 + the bonus point; the checker adds the bonus into the /6 total)
+Individual points found by this script: 6/6, bonus +1  (+ A1/A2 4 pts in lab06/starter)
 ```
 
 `cd lab06/starter && pytest -q` → `42 passed`; `pytest -q tests/test_rag.py -k "citation or abstain"` → `2 passed`.
