@@ -19,14 +19,14 @@ Branch `lab6/han_htg` · PR title `Lab 6 – han_htg – A1/A2 + comparison` · 
 `pytest -q test_mini_search.py`:
 
 ```
-__ passed
+4 passed
 ```
 
 `python submissions/lab06/check.py han_htg` (last line):
 
 ```
-Individual points found by this script: __/6
+Individual points found by this script: 7/6  (+ A1/A2 4 pts in lab06/starter, + bonus)
 ```
 
 ## AI use
-Logged in `docs/ai-use-log.md`: yes / no / not used
+Logged in `docs/ai-use-log.md`: yes 
