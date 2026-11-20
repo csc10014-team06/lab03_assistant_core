@@ -22,7 +22,10 @@ llm (stub)            16/20       4/5     0.2     0.7   fails: E13 E14 E15 E19
 <!-- cd lab06/starter && python eval/compare_paths.py ../../submissions/lab06/nhat_dm/h1_cases.jsonl -->
 
 ```
-(paste the output here)
+path                correct  abstain ok  p50 ms  max ms
+deterministic          9/25       7/7     0.0     0.7   fails: E01 E02 E05 E06 E07 E08 E09 E10 E11 E12 E13 E14 E15 E41 E42 E43
+retrieval             21/25       6/7     0.1     0.1   fails: E13 E14 E15 E19
+llm (stub)            21/25       6/7     0.3     0.9   fails: E13 E14 E15 E19
 ```
 
-Why a case fails: TODO
+Why a case fails: Cases E41, E42, and E43 fail under the deterministic path because it lacks knowledge base search and never answers handbook questions from documents, while E19 fails on retrieval because an ambiguous query matches general exam chunks above min_score rather than abstaining.
