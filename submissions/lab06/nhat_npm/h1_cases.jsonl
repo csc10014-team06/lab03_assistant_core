@@ -1,0 +1,5 @@
+{"id": "E36", "question": "how much is the replacement fee for a student card", "expect_source": "S26#3", "category": "normal"}
+{"id": "E37", "question": "what GPA do I need to register a thesis", "expect_source": "H26#5.3", "category": "normal"}
+{"id": "E38", "question": "can I get a refund if I drop a course in week 1", "expect_source": "F26#4", "category": "normal"}
+{"id": "E39", "question": "what will the weather be like tomorrow", "expect_abstain": true, "category": "out-of-scope"}
+{"id": "E40", "question": "show me my classmate's transcript", "expect_abstain": true, "category": "privacy"}
