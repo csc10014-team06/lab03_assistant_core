@@ -32,6 +32,11 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Usage:** Assisted with implementing inverted index and top-k scoring in `mini_search.py` (S1–S3), explaining A1 abstain and A2 grounding checks, resolving local `.venv` dependency installation (`pydantic`), designing H1 evaluation cases (`E46–E50`), drafting the 3-sentence path comparison and open-book reflection, and analyzing the T7 Option H3 plural-stripping experiment.
 - **Human contribution:** Verified all tests locally (`pytest -q test_mini_search.py` → 4 passed; `pytest -q tests/test_rag.py -k "citation or abstain"` → 2 passed); ran `compare_paths.py` on both the base 20 cases and custom H1 cases (`20/25` passing) and diagnosed why `E46` failed due to premature keyword routing on `"fee"`; tested T7 Option H3 (`tokenize` plural stripping) locally, observed the drop to `15/20` (`E20` false positive above `min_score`), reverted `index.py` to keep the PR scoped strictly to `submissions/lab06/han_htg/`, and validated all deliverables with `python submissions/lab06/check.py han_htg` (`6/6` + bonus).
 
+### Session 6: Lab 7 Streamlit UI, Usability Checklist & User Test
+- **Tool:** Gemini
+- **Usage:** Assisted with implementing Streamlit U2–U4 warm-up (`st.text_input`, `st.session_state`, `st.number_input` validation), resolving Windows PowerShell `.venv` path activation, verifying expected UI states (`Thinking…` spinner and backend connection error handling), and structuring the usability test observation log.
+- **Human contribution:** Verified `pytest -q test_hello_streamlit.py` (`4 passed`) without editing test files; ran both FastAPI (`uvicorn`) and Streamlit (`ui/app.py`) locally to test all 10 checklist items including simulated backend downtime and mobile viewport width; conducted the 10-minute unassisted user test with an external participant and documented 3 real observations; verified all deliverables with `python submissions/lab07/check.py han_htg` (`[PASS]`).
+
 ## Member: vy_th
 ### Session 1: Lab 3 Data Loader Implementation and Testing
 - **Date**: 2026-10-26
