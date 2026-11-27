@@ -26,6 +26,12 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Usage:** Guided adaptation of Lab 5 database foundation files (`assistant_api/db.py`, `sql/migrations/`, `scripts/migrate.py`, `scripts/seed.py`) to the team's flat layout, drafted the `Database` setup section for `README.md`, and assisted with individual SQL queries (`Q1–Q15`, `H2`) and parameterized `sqlite3` repository functions (`D1–D3`).
 - **Human contribution:** Verified flat-layout imports and editable installation (`pip install -e .`); resolved Ruff `F841` warning in `list_feedback` while preserving `R1`/`R2` placeholders for teammates; tested idempotent migrations twice (`python scripts/migrate.py assistant.db`); verified individual practice locally via `python check.py` (`Score: 15/15`) and `pytest -q test_school_repo.py` (`5 passed`) while keeping `*.db` files untracked.
 
+### Session 5: Lab 6 RAG, Abstain, Grounding, Eval & H3 Bonus
+- **Tool:** Gemini
+- **Date:** 2026-11-20
+- **Usage:** Assisted with implementing inverted index and top-k scoring in `mini_search.py` (S1–S3), explaining A1 abstain and A2 grounding checks, resolving local `.venv` dependency installation (`pydantic`), designing H1 evaluation cases (`E46–E50`), drafting the 3-sentence path comparison and open-book reflection, and analyzing the T7 Option H3 plural-stripping experiment.
+- **Human contribution:** Verified all tests locally (`pytest -q test_mini_search.py` → 4 passed; `pytest -q tests/test_rag.py -k "citation or abstain"` → 2 passed); ran `compare_paths.py` on both the base 20 cases and custom H1 cases (`20/25` passing) and diagnosed why `E46` failed due to premature keyword routing on `"fee"`; tested T7 Option H3 (`tokenize` plural stripping) locally, observed the drop to `15/20` (`E20` false positive above `min_score`), reverted `index.py` to keep the PR scoped strictly to `submissions/lab06/han_htg/`, and validated all deliverables with `python submissions/lab06/check.py han_htg` (`6/6` + bonus).
+
 ## Member: vy_th
 ### Session 1: Lab 3 Data Loader Implementation and Testing
 - **Date**: 2026-10-26
