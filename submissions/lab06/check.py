@@ -189,6 +189,12 @@ def check_bonus(folder: Path) -> Item:
 # --- driver -----------------------------------------------------------------------------------------
 
 
+def points(items: list[Item]) -> tuple[float, float]:
+    """(points out of 6 for T1/T4/T5/T6, bonus points) — the bonus is not part of the /6."""
+    core = sum(i.points for i in items if i.required)
+    return core, sum(i.points for i in items if not i.required)
+
+
 def check_member(member: str, verbose: bool = True) -> list[Item]:
     folder = HERE / member
     if not folder.is_dir():
@@ -208,8 +214,8 @@ def check_member(member: str, verbose: bool = True) -> list[Item]:
                 cells = " ".join(f"{p.split()[0]}={'❌' if c.get('id') in f else '✅'}" for p, (_, _, f) in rows.items())
                 expected = "abstain" if c.get("expect_abstain") else c.get("expect_source", c.get("expect_contains"))
                 print(f"    {c.get('id')} [{expected}] {cells}  — {c.get('question')}")
-        got = sum(i.points for i in items)
-        print(f"\n  Individual points found by this script: {got:g}/6  (+ A1/A2 4 pts in lab06/starter, + bonus)")
+        core, bonus = points(items)
+        print(f"\n  Individual points found by this script: {core:g}/6, bonus +{bonus:g}  (+ A1/A2 4 pts in lab06/starter)")
     return items
 
 
