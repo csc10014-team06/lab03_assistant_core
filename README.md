@@ -180,6 +180,25 @@ Individual work goes in `submissions/lab06/<member>/`; check it with `python sub
 Team plan: `docs/team-plan-lab06.md` · baseline: `docs/lab6/path_comparison.md`.
 
 ---
+## Lab 7: user interface
+
+The Lab 7 app lives in [`lab07/starter/`](lab07/starter/README.md): the Lab 6 backend plus a Streamlit chat UI that talks
+to it only over HTTP. Give it **its own** virtual environment:
+
+```bash
+cd lab07/starter
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip install -e .
+cp .env.example .env
+pytest -q                                              # 49 passed
+uvicorn assistant_api.main:create_app --factory        # terminal 1
+streamlit run ui/app.py                                # terminal 2 → http://localhost:8501
+```
+
+Individual work: `submissions/lab07/<member>/`, checked with `python submissions/lab07/check.py <member>`.
+Team plan: `docs/team-plan-lab07.md`.
+
+---
 ## Testing & Code Quality
 
 The test suite includes characterization tests verifying backwards compatibility against the legacy monolith, as well as comprehensive unit tests for each module.
