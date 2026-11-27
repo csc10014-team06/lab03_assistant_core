@@ -5,9 +5,9 @@ thing **our code** checks that the model does not (e.g. the grounding check, or 
 Exactly 5 lines between the markers, in your own words (English or Vietnamese). Do not copy a teammate.
 
 <!-- reflection:start -->
-TODO line 1
-TODO line 2
-TODO line 3
-TODO line 4
-TODO line 5
+Imagine I am taking an exam where I can look up information in my textbooks.
+Instead of trying to remember everything, I find the section related to the question.
+RAG works similarly by giving AI relevant documents before asking it to answer.
+In this lab, I learned that our code checks whether the sources cited by AI were actually retrieved.
+I also realized that finding a related document does not always mean it contains the correct answer, as shown in case E19.
 <!-- reflection:end -->

@@ -2,24 +2,30 @@
 
 ## T4 — base 20 cases
 
-<!-- cd lab06/starter && python eval/compare_paths.py   — paste everything it prints between the fences. -->
-
 ```
-(paste the output here)
+path                correct  abstain ok  p50 ms  max ms
+deterministic          7/20       5/5     0.0     0.3   fails: E01 E02 E05 E06 E07 E08 E09 E10 E11 E12 E13 E14 E15
+retrieval             16/20       4/5     0.0     0.0   fails: E13 E14 E15 E19
+llm (stub)            16/20       4/5     0.1     0.4   fails: E13 E14 E15 E19
 ```
 
-### 3 sentences (exactly one per line, replace TODO)
+### 3 sentences
 
-(a) For handbook questions I would use: TODO
-(b) Because: TODO
-(c) The failure I would fix first (one of E13, E14, E15, E19): TODO
+(a) For handbook questions, I would use the retrieval path.
+
+(b) I chose retrieval because it achieves the same accuracy as the LLM stub (16/20) while directly quoting official documents without requiring a language model.
+
+(c) I would fix E19 first because the assistant answers a question about open-book exams even though the retrieved documents do not contain the required information.
 
 ## T5 — with my 5 H1 cases (E26–E30)
 
-<!-- cd lab06/starter && python eval/compare_paths.py ../../submissions/lab06/vy_th/h1_cases.jsonl -->
-
 ```
-(paste the output here)
+cases: 25 from lab06/starter/eval/cases.jsonl, submissions/lab06/vy_th/h1_cases.jsonl
+
+path                correct  abstain ok  p50 ms  max ms
+deterministic          9/25       7/7     0.0     0.6   fails: E01 E02 E05 E06 E07 E08 E09 E10 E11 E12 E13 E14 E15 E26 E27 E28
+retrieval             21/25       6/7     0.0     0.1   fails: E13 E14 E15 E19
+llm (stub)            21/25       6/7     0.1     0.4   fails: E13 E14 E15 E19
 ```
 
-Why a case fails: TODO
+Why a case fails: All five of my new cases pass on retrieval and LLM, but E26–E28 fail on the deterministic path because it relies on predefined rules rather than retrieving information from the knowledge base.
