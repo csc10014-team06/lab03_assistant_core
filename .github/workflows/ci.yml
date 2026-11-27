@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "feat/**", "feature/**", "chore/**", "lab6/**" ]
+    branches: [ "main", "feat/**", "feature/**", "chore/**", "lab6/**", "lab7/**" ]
   pull_request:
     branches: [ "main" ]
 
@@ -73,3 +73,43 @@ jobs:
 
       - name: Evaluate members' H1 cases too (report only)
         run: python eval/compare_paths.py --include-submissions
+
+  lab07-starter:
+    # Lab 7 app (lab07/starter): API + Streamlit UI, its own pinned requirements, tests and eval check.
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    defaults:
+      run:
+        working-directory: lab07/starter
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Run tests (49 expected, incl. UI logic)
+        run: pytest -q
+
+      - name: Eval check — retrieval and llm (stub) must stay >= 16/20
+        run: |
+          python eval/compare_paths.py | tee eval.txt
+          python - <<'PY'
+          import re, sys
+          rows = dict(re.findall(r"^(retrieval|llm \(stub\))\s+(\d+)/20", open("eval.txt").read(), re.M))
+          print(rows)
+          sys.exit(0 if len(rows) == 2 and all(int(v) >= 16 for v in rows.values()) else 1)
+          PY
