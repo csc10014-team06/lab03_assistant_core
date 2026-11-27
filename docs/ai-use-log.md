@@ -74,6 +74,20 @@ Record of AI-assistant usage across the refactoring process (as required by `doc
 - **Changed**: Added database initialization, response latency measurement, and interaction metadata recording without storing raw messages. Added a persistence test using temporary SQLite.
 - **Verification**: Full pytest — 304 passed; Ruff — all checks passed.
 
+### Session 6: Lab 7 Streamlit UI and Usability Testing
+- **Date**: 2026-11-27
+- **Tool**: ChatGPT (OpenAI)
+- **Prompt**: Guide me step by step through Lab 7 Streamlit exercises U2–U4, usability testing, Google PAIR Guidebook reflection, Git workflow, and peer review.
+- **Kept**: The provided Streamlit starter structure, original test files, shared backend and UI implementation, and submission checker.
+- **Changed**:
+  1. Implemented U2–U4 with AI guidance, including greeting input, session-state counter, and credit validation.
+  2. Used AI guidance to troubleshoot local setup and evaluate the ten usability checklist items.
+  3. Used AI to translate and refine observations from a real usability test and additional testing with an external tester.
+  4. Drafted the H2 reflection based on the Google PAIR Guidebook and the observed usability issues.
+  5. Used AI assistance to prepare Conventional Commits, the PR description, and peer review comments.
+- **Human contribution**: Executed all commands and tests locally, manually verified the running UI, conducted the real-user test, confirmed the observations, and reviewed the suggested changes before committing.
+- **Verification**: Streamlit warm-up — 4/4 tests passed; Lab 7 starter — 49 tests passed with one deprecation warning; submission checker — all PASS; usability checklist — 9/10 ticked with one explained item; PR #83 — 14/14 CI checks passed.
+
 ## Member: nhat_dm
 
 ### Session 1: Lab 4 Service Bridge & Data Models
